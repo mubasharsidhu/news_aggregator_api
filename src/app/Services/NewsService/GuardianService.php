@@ -33,12 +33,11 @@ class GuardianService implements FetchArticleContract
      * Fetch Articles and normalize them to ArticleDTO objects
      *
      * @param int (required) $page The page number for pagination.
-     * @param string (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param string (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
+     * @param string (required) $from The start date Y-m-d format (e.g., "2024-11-20").
      *
      * @return ArticleDTO[] Articles array in standard formate
      */
-    public function fetchArticles(int $page, string $from=''): array
+    public function fetchArticles(int $page, string $from): array
     {
         if (!isset($this->apiBaseUrl)) {
             throw new \Exception("Unsupported service: " . $this->source);
@@ -72,7 +71,7 @@ class GuardianService implements FetchArticleContract
      * Prepare params for HTTP request
      *
      * @param int (required) $page The page number for pagination.
-     * @param string (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param string (required) $from The start date Y-m-d format (e.g., "2024-11-20").
      *
      * @return array
      */
@@ -80,15 +79,11 @@ class GuardianService implements FetchArticleContract
     {
         $params = [
             'api-key'     => config('services.guardian_news.key'),
-            'from-date'   => now()->subHour()->toIso8601String(),
+            'show-fields' => 'standfirst,body,publication,byline,thumbnail',
+            'from-date'   => $from,
             'page'        => $page,
             'page-size'   => $this->pageSize,
-            'show-fields' => 'standfirst,body,publication,byline,thumbnail',
         ];
-
-        if (!empty($from) && $this->isIso8601Date($from)) {
-            $params['from-date'] = $from;
-        }
 
         return $params;
     }
@@ -97,9 +92,10 @@ class GuardianService implements FetchArticleContract
      * Normalize data to a standardized structure.
      *
      * @param array $article fetched single-article in API's raw formate.
+     *
      * @return ArticleDTO The normalized article as an ArticleDTO object.
      */
-    public function normalizeData($article): ArticleDTO
+    public function normalizeData(array $article): ArticleDTO
     {
         $dto              = new ArticleDTO();
         $dto->title       = isset( $article['webTitle']) ? $article['webTitle'] : '';

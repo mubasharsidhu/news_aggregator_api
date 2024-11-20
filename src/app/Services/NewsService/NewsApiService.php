@@ -33,11 +33,11 @@ class NewsApiService implements FetchArticleContract
      * Fetch Articles and normalize them to ArticleDTO objects
      *
      * @param int (required) $page The page number for pagination.
-     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param string (required) $from The start date Y-m-d format (e.g., "2024-11-20").
      *
      * @return ArticleDTO[] Articles array in standard formate
      */
-    public function fetchArticles(int $page, $from=''): array
+    public function fetchArticles(int $page, string $from): array
     {
         if (!isset($this->apiBaseUrl)) {
             throw new \Exception("Unsupported service: " . $this->source);
@@ -74,23 +74,19 @@ class NewsApiService implements FetchArticleContract
      * Prepare params for HTTP request
      *
      * @param int (required) $page The page number for pagination.
-     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param string (required) $from The start date Y-m-d format (e.g., "2024-11-20").
      *
      * @return array
      */
-    private function prepareParams($page, $from): array
+    private function prepareParams(int $page, string $from): array
     {
         $params = [
             'apiKey'   => config('services.newsapi_news.key'),
-            'from'     => now()->subHour()->toIso8601String(),
             'q'        => 'news',
+            'from'     => $from,
             'page'     => $page,
             'pageSize' => $this->pageSize,
         ];
-
-        if (!empty($from) && $this->isIso8601Date($from)) {
-            $params['from'] = $from;
-        }
 
         return $params;
     }
@@ -99,9 +95,10 @@ class NewsApiService implements FetchArticleContract
      * Normalize data to a standardized structure.
      *
      * @param array $article The article data as an associative array.
+     *
      * @return ArticleDTO The normalized article as an ArticleDTO object.
      */
-    public function normalizeData($article): ArticleDTO
+    public function normalizeData(array $article): ArticleDTO
     {
         $dto              = new ArticleDTO();
         $dto->title       = isset( $article['title']) ? $article['title'] : '';

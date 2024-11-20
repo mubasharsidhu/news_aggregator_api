@@ -3,12 +3,10 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Models\Article;
-use App\Services\LoggerService;
-
-use \Symfony\Component\Console\Output\ConsoleOutput;
+use App\Jobs\FetchArticlesJob;
 
 class FetchArticles extends Command
 {
@@ -17,19 +15,21 @@ class FetchArticles extends Command
      *
      * @param string `--source` (required): The source from which to fetch articles (e.g., `newsapi`).
      * @param int `--page` (optional, default: 1): The page number to retrieve articles from.
-     * @param string `--from` (optional): The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param string `--from` (optional): The start date in Y-m-d format (e.g., "2024-11-20").
+     * @param int `--delay` (optional, default: 12): The delay in seconds between each page iteration.
      */
     protected $signature = 'articles:fetch
         {--source= : The source of the articles}
         {--page=1 : The page number}
-        {--from= : The start date}';
+        {--from= : The start date}
+        {--delay=12 : The delay in seconds between each page iteration}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Fetch articles from a specified news service and save them to the database';
+    protected $description = 'Fetch articles from a specified news service and save them to our database.';
 
     /**
      * The NewsServiceFactory object
@@ -38,6 +38,11 @@ class FetchArticles extends Command
      */
     protected $newsService;
 
+    /**
+     * Create a new class instance and set initial values
+     *
+     * @param NewsServiceFactory $newsService The news service to fetch from
+     */
     public function __construct(NewsServiceFactory $newsService) {
         parent::__construct();
         $this->newsService = $newsService;
@@ -60,9 +65,13 @@ class FetchArticles extends Command
 
         $page = $this->option('page');
         $from = (string) $this->option('from');
+        if (empty($from)) {
+            $from = now()->subDay()->format('Y-m-d');
+        }
 
         try {
             $articles = $this->newsService->create($source)->fetchArticles($page, $from);
+
             if (empty($articles['normalizedArticles'])) {
                 $logger->info("No articles found on page {$page}. Fetching completed.");
                 return;
@@ -78,7 +87,7 @@ class FetchArticles extends Command
             $logger->info("Page {$page} has been processed. Articles have been saved successfully.");
 
             if ($articles['currentPage'] === $articles['totalPages']) {
-                $logger->info("All the articles processed, fetching completed.");
+                $logger->info("All the articles are processed, fetching completed.");
                 return;
             }
 
@@ -86,15 +95,11 @@ class FetchArticles extends Command
             $logger->info("Fetching next page...");
 
             // Trigger the next iteration (page) of the command
-            return Artisan::call(
-                'articles:fetch',
-                [
-                    '--source' => $source,
-                    '--page'   => $nextPage,
-                    '--from'   => $from,
-                ],
-                new ConsoleOutput()
-            );
+            $delay = (int) $this->option('delay');
+
+            FetchArticlesJob::dispatch($source, $nextPage, $from)->delay(now()->addSeconds($delay));
+
+            $logger->info("Next page:{$nextPage} is dispatched and will be executed in {$delay} seconds.");
 
         } catch (\Exception $e) {
             $logger->error('Error fetching articles: ' . $e->getMessage());
