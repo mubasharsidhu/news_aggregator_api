@@ -35,16 +35,9 @@ return [
         ],
     ],
 
-    'newsapi_news' => [
-        'key' => env('NEWS_API_KEY'),
+    'news_aggregator_api' => [
+        'newsapi_api_key'  => env('NEWS_API_KEY'),
+        'guardian_api_key' => env('GUARDIAN_API_KEY'),
+        'nytimes_api_key'  => env('NYT_API_KEY'),
     ],
-
-    'guardian_news' => [
-        'key' => env('GUARDIAN_API_KEY'),
-    ],
-
-    'nytimes_news' => [
-        'key' => env('NYT_API_KEY'),
-    ],
-
 ];

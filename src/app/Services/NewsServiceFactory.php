@@ -4,30 +4,13 @@ namespace App\Services;
 
 class NewsServiceFactory
 {
-    /* private $baseUrls = [
-        'newyork'  => 'https://api.nytimes.com/svc/search/v2/articlesearch.json',
-    ]; */
-
-    /* private $request_fields_mapping;
-
-    private $response_fields_mapping;
-
-    public function __construct()
-    {
-        $this->response_fields_mapping = [
-            'newyork' => [
-                'title'       => 'headline.main',
-                'description' => 'lead_paragraph',
-                'content'     => 'abstract',
-                'publishedAt' => 'pub_date',
-                'source'      => 'source',
-                'author'      => 'byline.original',
-                'imageUrl'    => 'multimedia.0.url',
-                'articleUrl'  => 'web_url',
-            ],
-        ];
-    }
- */
+    /**
+     * Creates and returns an instance of a specific news API source.
+     *
+     * @param string $source (required): The source name from which to fetch articles (e.g., `newsapi`).
+     *
+     * @return instance of a specific News Api service class
+     */
     public function create($source)
     {
         $className = 'App\\Services\\NewsService\\' . ucfirst($source) . 'Service';
@@ -38,5 +21,4 @@ class NewsServiceFactory
 
         throw new \Exception("API Service class $className not found.");
     }
-
 }

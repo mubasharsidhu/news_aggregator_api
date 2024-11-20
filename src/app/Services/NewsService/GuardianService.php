@@ -78,7 +78,7 @@ class GuardianService implements FetchArticleContract
     private function prepareParams(int $page, string $from): array
     {
         $params = [
-            'api-key'     => config('services.guardian_news.key'),
+            'api-key'     => config('services.news_aggregator_api.guardian_api_key'),
             'show-fields' => 'standfirst,body,publication,byline,thumbnail',
             'from-date'   => $from,
             'page'        => $page,

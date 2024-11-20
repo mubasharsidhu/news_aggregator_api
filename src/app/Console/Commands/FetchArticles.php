@@ -87,7 +87,7 @@ class FetchArticles extends Command
             $logger->info("Page {$page} has been processed. Articles have been saved successfully.");
 
             if ($articles['currentPage'] === $articles['totalPages']) {
-                $logger->info("All the articles are processed, fetching completed.");
+                $logger->info("All done for today! Fetching completed for {$source}.");
                 return;
             }
 

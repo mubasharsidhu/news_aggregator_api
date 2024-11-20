@@ -81,7 +81,7 @@ class NewsApiService implements FetchArticleContract
     private function prepareParams(int $page, string $from): array
     {
         $params = [
-            'apiKey'   => config('services.newsapi_news.key'),
+            'apiKey'   => config('services.news_aggregator_api.newsapi_api_key'),
             'q'        => 'news',
             'from'     => $from,
             'page'     => $page,
