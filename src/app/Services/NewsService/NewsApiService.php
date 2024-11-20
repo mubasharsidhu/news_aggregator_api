@@ -7,14 +7,19 @@ use App\DTOs\ArticleDTO;
 use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
 
+use App\Traits\Iso8601Checker;
+
 class NewsApiService implements FetchArticleContract
 {
+    use Iso8601Checker;
 
     private $apiBaseUrl = 'https://newsapi.org/v2/everything?q=news';
 
     private $baseParams;
 
     private $source;
+
+    private $pageSize = 50;
 
     /**
      * Create a new class instance and set initial values
@@ -23,14 +28,7 @@ class NewsApiService implements FetchArticleContract
      */
     public function __construct(string $source)
     {
-        $this->source     = $source;
-        $this->baseParams = [
-            'apiKey'   => config('services.newsapi_news.key'),
-            'from'     => now()->subHour()->toIso8601String(),
-            'to'       => now()->toIso8601String(),
-            'q'        => 'news',
-            'pageSize' => 50,
-        ];
+        $this->source = $source;
     }
 
     /**
@@ -68,7 +66,39 @@ class NewsApiService implements FetchArticleContract
             $mappedArticles[] = $this->normalizeData($article);
         }
 
-        return $mappedArticles;
+        return [
+            'currentPage'        => $page,
+            'totalPages'         => \ceil(($data['totalResults']/$this->pageSize)),
+            'normalizedArticles' => $mappedArticles
+        ];
+    }
+
+    /**
+     * Prepare params for HTTP request
+     *
+     * @param int (required) $page The page number for pagination.
+     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
+     *
+     * @return array
+     */
+    private function prepareParams($page, $from, $to): array
+    {
+        $params = [
+            'apiKey'   => config('services.newsapi_news.key'),
+            'from'     => now()->subHour()->toIso8601String(),
+            'to'       => now()->toIso8601String(),
+            'q'        => 'news',
+            'page'     => $page,
+            'pageSize' => $this->pageSize,
+        ];
+
+        if (!empty($from) && $this->isIso8601Date($from) && !empty($to) && $this->isIso8601Date($to)) {
+            $params['from'] = $from;
+            $params['to']   = $to;
+        }
+
+        return $params;
     }
 
     /**
@@ -91,45 +121,6 @@ class NewsApiService implements FetchArticleContract
         $dto->apiSource   = $this->source;
 
         return $dto;
-    }
-
-
-    /**
-     * Prepare params for HTTP request
-     *
-     * @param int (required) $page The page number for pagination.
-     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
-     *
-     * @return array
-     */
-    private function prepareParams($page, $from, $to): array
-    {
-        $this->baseParams['page'] = $page;
-
-        if (!empty($from) && $this->isIso8601String($from) && !empty($to) && $this->isIso8601String($to)) {
-            $this->baseParams['from'] = $from;
-            $this->baseParams['to']   = $to;
-        }
-
-        return $this->baseParams;
-    }
-
-    /**
-     * Check if a string is in ISO 8601 format.
-     *
-     * @param string $date
-     * @return bool
-     */
-    function isIso8601String(string $date): bool
-    {
-        try {
-            $parsedDate = new \DateTime($date);
-            // Convert back to ISO 8601 and compare to ensure valid format
-            return $parsedDate->format(\DateTime::ATOM) === $date;
-        } catch (\Exception $e) {
-            return false;
-        }
     }
 
 }

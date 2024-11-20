@@ -17,11 +17,9 @@ class FetchArticles extends Command
      *
      * @param string `--source` (required): The source from which to fetch articles (e.g., `newsapi`).
      * @param int `--page` (optional, default: 1): The page number to retrieve articles from.
-     * @param date `--from` (optional): The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param date `--to` (optional): The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
+     * @param string `--from` (optional): The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param string `--to` (optional): The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
      * The --from and --to params must be given together
-     *
-     * @var string
      */
     protected $signature = 'articles:fetch
         {--source= : The source of the articles}
@@ -55,17 +53,17 @@ class FetchArticles extends Command
      */
     public function handle(LoggerService $logger) { // TODO: schedule this call
 
-        $logger->info('Fetching articles from NewsAPI...');
-
         $source = $this->option('source');
         if (empty($source)) {
             $logger->error('The --source option is required.');
             return;
         }
 
+        $logger->info("Fetching articles from {$source}...");
+
         $page   = $this->option('page');
-        $from   = $this->option('from');
-        $to     = $this->option('to');
+        $from   = (string) $this->option('from');
+        $to     = (string) $this->option('to');
 
         if ( (empty($from) && !empty($to)) || (!empty($from) && empty($to)) ) {
             $logger->error('Both --from and --to fields must be either filled together or left empty together.');
@@ -74,20 +72,24 @@ class FetchArticles extends Command
 
         try {
             $articles = $this->newsService->create($source)->fetchArticles($page, $from, $to);
-
-            if (empty($articles)) {
+            if (empty($articles['normalizedArticles'])) {
                 $logger->info("No articles found on page {$page}. Fetching completed.");
-                return; // Stop if no articles are returned
+                return;
             }
 
             $logger->info('Processing articles...');
 
-            foreach ($articles as $article) {
+            foreach ($articles['normalizedArticles'] as $article) {
                 $article = (array) $article;
                 Article::updateOrCreate(['articleUrl' => $article['articleUrl']], $article);
             }
 
             $logger->info("Page {$page} has been processed. Articles have been saved successfully.");
+
+            if ($articles['currentPage'] === $articles['totalPages']) {
+                $logger->info("All the articles processed, fetching completed.");
+                return;
+            }
 
             $nextPage = $page + 1;
             $logger->info("Fetching next page...");
