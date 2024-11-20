@@ -15,8 +15,6 @@ class NewsApiService implements FetchArticleContract
 
     private $apiBaseUrl = 'https://newsapi.org/v2/everything?q=news';
 
-    private $baseParams;
-
     private $source;
 
     private $pageSize = 50;
@@ -36,17 +34,16 @@ class NewsApiService implements FetchArticleContract
      *
      * @param int (required) $page The page number for pagination.
      * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
      *
      * @return ArticleDTO[] Articles array in standard formate
      */
-    public function fetchArticles(int $page, $from='', $to=''): array
+    public function fetchArticles(int $page, $from=''): array
     {
         if (!isset($this->apiBaseUrl)) {
             throw new \Exception("Unsupported service: " . $this->source);
         }
 
-        $params   = $this->prepareParams($page, $from, $to);
+        $params   = $this->prepareParams($page, $from);
         $response = Http::get($this->apiBaseUrl, $params);
 
         if ($response->failed()) {
@@ -78,24 +75,21 @@ class NewsApiService implements FetchArticleContract
      *
      * @param int (required) $page The page number for pagination.
      * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
      *
      * @return array
      */
-    private function prepareParams($page, $from, $to): array
+    private function prepareParams($page, $from): array
     {
         $params = [
             'apiKey'   => config('services.newsapi_news.key'),
             'from'     => now()->subHour()->toIso8601String(),
-            'to'       => now()->toIso8601String(),
             'q'        => 'news',
             'page'     => $page,
             'pageSize' => $this->pageSize,
         ];
 
-        if (!empty($from) && $this->isIso8601Date($from) && !empty($to) && $this->isIso8601Date($to)) {
+        if (!empty($from) && $this->isIso8601Date($from)) {
             $params['from'] = $from;
-            $params['to']   = $to;
         }
 
         return $params;

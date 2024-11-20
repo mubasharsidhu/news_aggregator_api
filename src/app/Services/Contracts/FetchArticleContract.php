@@ -11,7 +11,6 @@ interface FetchArticleContract
      *
      * @param int (required) $page The page number for pagination.
      * @param string (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param string (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
      *
      * @return array{
      *     currentPage: int,
@@ -19,7 +18,7 @@ interface FetchArticleContract
      *     normalizedArticles: ArticleDTO[]
      * } An associative array containing the current page, total pages, and an array of normalized ArticleDTO objects.
      */
-    public function fetchArticles(int $page, string $from='', string $to=''): array;
+    public function fetchArticles(int $page, string $from=''): array;
 
     /**
      * Normalize data to a standardized structure.

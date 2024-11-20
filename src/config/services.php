@@ -43,7 +43,7 @@ return [
         'key' => env('GUARDIAN_API_KEY'),
     ],
 
-    'newyork_news' => [
+    'nytimes_news' => [
         'key' => env('NYT_API_KEY'),
     ],
 

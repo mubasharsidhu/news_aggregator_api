@@ -18,14 +18,11 @@ class FetchArticles extends Command
      * @param string `--source` (required): The source from which to fetch articles (e.g., `newsapi`).
      * @param int `--page` (optional, default: 1): The page number to retrieve articles from.
      * @param string `--from` (optional): The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
-     * @param string `--to` (optional): The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
-     * The --from and --to params must be given together
      */
     protected $signature = 'articles:fetch
         {--source= : The source of the articles}
         {--page=1 : The page number}
-        {--from= : The start date}
-        {--to= : The end date}';
+        {--from= : The start date}';
 
     /**
      * The console command description.
@@ -61,17 +58,11 @@ class FetchArticles extends Command
 
         $logger->info("Fetching articles from {$source}...");
 
-        $page   = $this->option('page');
-        $from   = (string) $this->option('from');
-        $to     = (string) $this->option('to');
-
-        if ( (empty($from) && !empty($to)) || (!empty($from) && empty($to)) ) {
-            $logger->error('Both --from and --to fields must be either filled together or left empty together.');
-            return;
-        }
+        $page = $this->option('page');
+        $from = (string) $this->option('from');
 
         try {
-            $articles = $this->newsService->create($source)->fetchArticles($page, $from, $to);
+            $articles = $this->newsService->create($source)->fetchArticles($page, $from);
             if (empty($articles['normalizedArticles'])) {
                 $logger->info("No articles found on page {$page}. Fetching completed.");
                 return;
@@ -101,7 +92,6 @@ class FetchArticles extends Command
                     '--source' => $source,
                     '--page'   => $nextPage,
                     '--from'   => $from,
-                    '--to'     => $to,
                 ],
                 new ConsoleOutput()
             );

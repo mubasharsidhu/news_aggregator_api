@@ -9,15 +9,15 @@ use Carbon\Carbon;
 
 use App\Traits\Iso8601Checker;
 
-class GuardianService implements FetchArticleContract
+class NYtimesService implements FetchArticleContract
 {
     use Iso8601Checker;
 
-    private $apiBaseUrl = 'https://content.guardianapis.com/search';
+    private $apiBaseUrl = 'https://api.nytimes.com/svc/search/v2/articlesearch.json';
 
     private $source;
 
-    private $pageSize = 50;
+    private $pageSize = 10; // NewYork times returns 10 records at a time
 
     /**
      * Create a new class instance and set initial values
@@ -44,6 +44,7 @@ class GuardianService implements FetchArticleContract
             throw new \Exception("Unsupported service: " . $this->source);
         }
 
+        $page     = $page - 1; // New york times Api's page count starts from 0. Decrementing to standardize
         $params   = $this->prepareParams($page, $from);
         $response = Http::get($this->apiBaseUrl, $params);
 
@@ -52,18 +53,18 @@ class GuardianService implements FetchArticleContract
         }
 
         $data = $response->json();
-        if (!isset($data['response']['results']) || \count($data['response']['results'])<=0) {
+        if (!isset($data['response']['docs']) || \count($data['response']['docs'])<=0) {
             return [];
         }
 
         $mappedArticles = [];
-        foreach ($data['response']['results'] as $article) {
+        foreach ($data['response']['docs'] as $article) {
             $mappedArticles[] = $this->normalizeData($article);
         }
 
         return [
-            'currentPage'        => $data['response']['currentPage'],
-            'totalPages'         => $data['response']['pages'],
+            'currentPage'        => \ceil(($data['response']['meta']['offset']/$this->pageSize)) + 1, // New york times Api's page count starts from 0. Incrementing to standardize
+            'totalPages'         => \ceil(($data['response']['meta']['hits']/$this->pageSize)),
             'normalizedArticles' => $mappedArticles
         ];
     }
@@ -79,15 +80,14 @@ class GuardianService implements FetchArticleContract
     private function prepareParams(int $page, string $from): array
     {
         $params = [
-            'api-key'     => config('services.guardian_news.key'),
-            'from-date'   => now()->subHour()->toIso8601String(),
-            'page'        => $page,
-            'page-size'   => $this->pageSize,
-            'show-fields' => 'standfirst,body,publication,byline,thumbnail',
+            'api-key'    => config('services.nytimes_news.key'),
+            'begin_date' => now()->subDay()->format('Ymd'),
+            'page'       => $page,
+            'fl'         => 'headline,lead_paragraph,abstract,pub_date,source,byline,multimedia,web_url,print_page',
         ];
 
         if (!empty($from) && $this->isIso8601Date($from)) {
-            $params['from-date'] = $from;
+            $params['begin_date'] = $from;
         }
 
         return $params;
@@ -102,14 +102,14 @@ class GuardianService implements FetchArticleContract
     public function normalizeData($article): ArticleDTO
     {
         $dto              = new ArticleDTO();
-        $dto->title       = isset( $article['webTitle']) ? $article['webTitle'] : '';
-        $dto->description = isset( $article['fields']['standfirst']) ? $article['fields']['standfirst'] : '';
-        $dto->content     = isset( $article['fields']['body']) ? $article['fields']['body'] : '';
-        $dto->source      = isset( $article['fields']['publication']) ? $article['fields']['publication'] : '';
-        $dto->author      = isset( $article['fields']['byline']) ? $article['fields']['byline'] : '';
-        $dto->imageUrl    = isset( $article['fields']['thumbnail']) ? $article['fields']['thumbnail'] : '';
-        $dto->articleUrl  = isset( $article['webUrl']) ? $article['webUrl'] : '';
-        $dto->publishedAt = isset( $article['webPublicationDate']) ? Carbon::parse($article['webPublicationDate'])->toDateTimeString() : '';
+        $dto->title       = isset( $article['headline']['main']) ? $article['headline']['main'] : '';
+        $dto->description = isset( $article['lead_paragraph']) ? $article['lead_paragraph'] : '';
+        $dto->content     = isset( $article['abstract']) ? $article['abstract'] : '';
+        $dto->source      = isset( $article['source']) ? $article['source'] : '';
+        $dto->author      = isset( $article['byline']['original']) ? $article['byline']['original'] : '';
+        $dto->imageUrl    = isset( $article['multimedia'][0]['url']) ? $article['multimedia'][0]['url'] : '';
+        $dto->articleUrl  = isset( $article['web_url']) ? $article['web_url'] : '';
+        $dto->publishedAt = isset( $article['pub_date']) ? Carbon::parse($article['pub_date'])->toDateTimeString() : '';
         $dto->apiSource   = $this->source;
 
         return $dto;
