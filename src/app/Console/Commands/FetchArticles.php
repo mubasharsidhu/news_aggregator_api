@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\Artisan;
 use App\Services\NewsServiceFactory;
 use App\Models\Article;
 
+use \Symfony\Component\Console\Output\ConsoleOutput;
+
 class FetchArticles extends Command
 {
     /**
@@ -64,10 +66,15 @@ class FetchArticles extends Command
             $this->info("Fetching next page...");
 
             // Trigger the next iteration (page) of the command
-            Artisan::call('articles:fetch', [
-                'source' => $source,
-                'page'   => $nextPage,
-            ]);
+            return Artisan::call(
+                'articles:fetch',
+                [
+                    'source' => $source,
+                    'page'   => $nextPage,
+                ],
+                new ConsoleOutput()
+            );
+
         } catch (\Exception $e) {
             $this->error('Error fetching articles: ' . $e->getMessage());
         }
