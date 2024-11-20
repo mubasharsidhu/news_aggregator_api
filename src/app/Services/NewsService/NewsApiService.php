@@ -25,26 +25,31 @@ class NewsApiService implements FetchArticleContract
     {
         $this->source     = $source;
         $this->baseParams = [
-            'apiKey' => config('services.newsapi_news.key'),
-            'q'      => 'news',
-            'from'   => now()->subMonth()->toIso8601String(),
-            'to'     => now()->toIso8601String(),
+            'apiKey'   => config('services.newsapi_news.key'),
+            'from'     => now()->subHour()->toIso8601String(),
+            'to'       => now()->toIso8601String(),
+            'q'        => 'news',
+            'pageSize' => 50,
         ];
     }
 
     /**
      * Fetch Articles and normalize them to ArticleDTO objects
      *
-     * @param array $params
+     * @param int (required) $page The page number for pagination.
+     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
+     *
      * @return ArticleDTO[] Articles array in standard formate
      */
-    public function fetchArticles(array $params=[]): array
+    public function fetchArticles(int $page, $from='', $to=''): array
     {
         if (!isset($this->apiBaseUrl)) {
             throw new \Exception("Unsupported service: " . $this->source);
         }
 
-        $response = Http::get($this->apiBaseUrl, array_merge($params, $this->baseParams));
+        $params   = $this->prepareParams($page, $from, $to);
+        $response = Http::get($this->apiBaseUrl, $params);
 
         if ($response->failed()) {
             throw new \Exception("Failed to fetch articles from {$this->source}: " . $response->body());
@@ -66,6 +71,12 @@ class NewsApiService implements FetchArticleContract
         return $mappedArticles;
     }
 
+    /**
+     * Normalize data to a standardized structure.
+     *
+     * @param array $article The article data as an associative array.
+     * @return ArticleDTO The normalized article as an ArticleDTO object.
+     */
     public function normalizeData($article): ArticleDTO
     {
         $dto              = new ArticleDTO();
@@ -80,6 +91,45 @@ class NewsApiService implements FetchArticleContract
         $dto->apiSource   = $this->source;
 
         return $dto;
+    }
+
+
+    /**
+     * Prepare params for HTTP request
+     *
+     * @param int (required) $page The page number for pagination.
+     * @param date (optional) $from The start date in ISO 8601 format (e.g., "2024-11-20T00:00:00Z").
+     * @param date (optional) $to The end date in ISO 8601 format (e.g., "2024-11-20T23:59:59Z").
+     *
+     * @return array
+     */
+    private function prepareParams($page, $from, $to): array
+    {
+        $this->baseParams['page'] = $page;
+
+        if (!empty($from) && $this->isIso8601String($from) && !empty($to) && $this->isIso8601String($to)) {
+            $this->baseParams['from'] = $from;
+            $this->baseParams['to']   = $to;
+        }
+
+        return $this->baseParams;
+    }
+
+    /**
+     * Check if a string is in ISO 8601 format.
+     *
+     * @param string $date
+     * @return bool
+     */
+    function isIso8601String(string $date): bool
+    {
+        try {
+            $parsedDate = new \DateTime($date);
+            // Convert back to ISO 8601 and compare to ensure valid format
+            return $parsedDate->format(\DateTime::ATOM) === $date;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
 }

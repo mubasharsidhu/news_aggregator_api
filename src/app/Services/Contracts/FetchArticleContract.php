@@ -7,9 +7,10 @@ use App\DTOs\ArticleDTO;
 interface FetchArticleContract
 {
     /**
-     * Fetch and Normalize data to a standardized structure.
+     * Normalize data to a standardized structure.
      *
-     * @param array $params
+     * @param array $article fetched article in raw formate
+     *
      * @return ArticleDTO object.
      */
     public function normalizeData(array $article): ArticleDTO;
