@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 use App\Traits\Iso8601Checker;
 
-class NewsApiService implements FetchArticleContract
+class NewsapiService implements FetchArticleContract
 {
     use Iso8601Checker;
 
@@ -81,7 +81,7 @@ class NewsApiService implements FetchArticleContract
     private function prepareParams(int $page, string $from): array
     {
         $params = [
-            'apiKey'   => config('services.news_aggregator_api.newsapi_api_key'),
+            'apiKey'   => config('services.news_aggregator_api_keys.newsapi'),
             'q'        => 'news',
             'from'     => $from,
             'page'     => $page,

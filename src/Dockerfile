@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y \
     libmcrypt-dev \
     libonig-dev \
     libpq-dev \
+    supervisor \
+    cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -31,16 +33,36 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 WORKDIR /var/www/html
 
 # Copy existing application directory contents
-COPY . /var/www/html/
+COPY ./src /var/www/html/
 
 # Set ownership and permissions for the /var/www/html directory to www-data
 RUN chown -R www-data:www-data /var/www/html/
+# Set permissions for /var/run and /var/run/crond so that www-data can write the cron PID file
+
+RUN mkdir -p /var/run \
+    && chown -R www-data:www-data /var/run \
+    && chmod 755 /var/run
+
+RUN mkdir -p /var/run/crond \
+    && chown -R www-data:www-data /var/run/crond \
+    && chmod 755 /var/run/crond
+
+# Copy the wait-for-it.sh script
+COPY ./src/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
+# Copy supervisord config
+COPY ../config/.docker/supervisord.conf /etc/supervisor/supervisord.conf
+
+# Set permissions for the supervisor logs directory
+RUN mkdir -p /var/log/supervisor \
+    && chown -R www-data:www-data /var/log/supervisor \
+    && chmod -R 777 /var/log/supervisor
 
 USER www-data
 
 EXPOSE 9000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:9000 || exit 1
 
-CMD ["php-fpm"]
+#CMD ["php-fpm"]
+CMD service cron start && php-fpm

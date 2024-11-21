@@ -53,11 +53,17 @@ class FetchArticles extends Command
      *
      * @param LoggerService $logger to log the information
      */
-    public function handle(LoggerService $logger) { // TODO: schedule this call
+    public function handle(LoggerService $logger) {
 
         $source = $this->option('source');
         if (empty($source)) {
             $logger->error('The --source option is required.');
+            return;
+        }
+
+        $news_aggregators = array_keys( config('services.news_aggregator_api_keys') );
+        if (!in_array($source, $news_aggregators)) {
+            $logger->error('Invalid source: The --source can only contain one of these values: '.\implode(', ', $news_aggregators));
             return;
         }
 

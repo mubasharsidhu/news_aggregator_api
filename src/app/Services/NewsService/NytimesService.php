@@ -9,7 +9,7 @@ use Carbon\Carbon;
 
 use App\Traits\Iso8601Checker;
 
-class NYtimesService implements FetchArticleContract
+class NytimesService implements FetchArticleContract
 {
     use Iso8601Checker;
 
@@ -79,7 +79,7 @@ class NYtimesService implements FetchArticleContract
     private function prepareParams(int $page, string $from): array
     {
         $params = [
-            'api-key'    => config('services.news_aggregator_api.nytimes_api_key'),
+            'api-key'    => config('services.news_aggregator_api_keys.nytimes'),
             'begin_date' => \str_replace('-', '', $from),
             'fl'         => 'headline,lead_paragraph,abstract,pub_date,source,byline,multimedia,web_url,print_page',
             'page'       => $page,
