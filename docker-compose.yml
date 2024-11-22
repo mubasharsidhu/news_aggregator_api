@@ -2,8 +2,8 @@ services:
   app:
     container_name: me_rmt_innoscripta_news_aggregator_api
     build:
-      context: ./src
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: src/Dockerfile
     restart: unless-stopped
     networks:
       - docker-network
@@ -17,6 +17,12 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
       - db
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "wait-for-it.sh db:3306 -- php artisan migrate && supervisord -c /etc/supervisor/supervisord.conf",
+      ]
 
   db:
     image: mysql:8.0

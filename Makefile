@@ -1,8 +1,8 @@
 setup:
+	@make clean
 	@make build
 	@make up
 	@make composer-install
-	@make add-deps
 
 
 setup-update:
@@ -22,14 +22,11 @@ up:
 	docker compose up -d
 
 composer-install:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer install"
+	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer install --no-dev"
 
 composer-update:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer update"
+	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer update --no-dev"
 
-data:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "php artisan migrate"
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "php artisan db:seed"
 
 serve:
 	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "php artisan serve"
@@ -38,7 +35,3 @@ serve:
 clean:
 	docker compose down --volumes --remove-orphans
 	docker system prune -f
-
-
-add-deps:
-	composer require --dev wecodemore/laravel-security-sniffer
