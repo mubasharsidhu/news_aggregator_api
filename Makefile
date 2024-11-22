@@ -22,14 +22,14 @@ up:
 	docker compose up -d
 
 composer-install:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer install --no-dev"
+	docker exec innoscripta_app bash -c "composer install --no-dev"
 
 composer-update:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "composer update --no-dev"
+	docker exec innoscripta_app bash -c "composer update --no-dev"
 
 
 serve:
-	docker exec me_rmt_innoscripta_news_aggregator_api bash -c "php artisan serve"
+	docker exec innoscripta_app bash -c "php artisan serve"
 
 
 clean:

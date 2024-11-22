@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
     libonig-dev \
     libpq-dev \
     supervisor \
-    cron \
+    #cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
@@ -43,9 +43,9 @@ RUN mkdir -p /var/run \
     && chown -R www-data:www-data /var/run \
     && chmod 755 /var/run
 
-RUN mkdir -p /var/run/crond \
-    && chown -R www-data:www-data /var/run/crond \
-    && chmod 755 /var/run/crond
+# RUN mkdir -p /var/run/crond \
+#     && chown -R www-data:www-data /var/run/crond \
+#     && chmod 755 /var/run/crond
 
 # Copy the wait-for-it.sh script
 COPY ./src/wait-for-it.sh /usr/local/bin/wait-for-it.sh
@@ -59,10 +59,13 @@ RUN mkdir -p /var/log/supervisor \
     && chown -R www-data:www-data /var/log/supervisor \
     && chmod -R 777 /var/log/supervisor
 
+# Copy the entrypoint script
+COPY ../config/.docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 USER www-data
 
 EXPOSE 9000
 
 
-#CMD ["php-fpm"]
-CMD service cron start && php-fpm
+CMD entrypoint.sh
