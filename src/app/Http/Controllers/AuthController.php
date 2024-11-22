@@ -75,21 +75,6 @@ class AuthController extends Controller
 
         $status = Password::sendResetLink($request->only('email'));
 
-
-
-
-
-
-
-
-        $tt = DB::table('password_reset_tokens')->where('email', $request->input('email'))->first();
-        exit($tt->token);
-
-
-
-
-
-
         return $status === Password::RESET_LINK_SENT
             ? response()->json(['message' => 'Password reset link sent'])
             : response()->json(['message' => 'Unable to send reset link'], 500);

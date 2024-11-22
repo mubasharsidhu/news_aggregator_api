@@ -102,7 +102,7 @@ class NytimesService implements FetchArticleContract
         $dto->description = isset( $article['lead_paragraph']) ? $article['lead_paragraph'] : '';
         $dto->content     = isset( $article['abstract']) ? $article['abstract'] : '';
         $dto->source      = isset( $article['source']) ? $article['source'] : '';
-        $dto->author      = isset( $article['byline']['original']) ? $article['byline']['original'] : '';
+        $dto->author      = isset( $article['byline']['original']) ? ltrim($article['byline']['original'], "By ") : '';
         $dto->imageUrl    = isset( $article['multimedia'][0]['url']) ? $article['multimedia'][0]['url'] : '';
         $dto->articleUrl  = isset( $article['web_url']) ? $article['web_url'] : '';
         $dto->publishedAt = isset( $article['pub_date']) ? Carbon::parse($article['pub_date'])->toDateTimeString() : '';
