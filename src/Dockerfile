@@ -4,28 +4,26 @@ FROM php:8.3.11-fpm
 RUN apt-get update && apt-get install -y \
     default-mysql-client \
     build-essential \
-    libpng-dev \
-    libjpeg-dev \
-    libwebp-dev \
-    libxpm-dev \
-    libfreetype6-dev \
     libzip-dev \
     zip \
     unzip \
     git \
     bash \
-    fcgiwrap \
-    libmcrypt-dev \
-    libonig-dev \
-    libpq-dev \
     supervisor \
-    #cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
-    && docker-php-ext-install gd \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath opcache
+RUN docker-php-ext-install pdo pdo_mysql zip pcntl bcmath opcache
+
+# Install Xdebug for code coverage
+RUN pecl install xdebug
+    #&& docker-php-ext-enable xdebug
+
+# Enable Xdebug in PHP configuration
+RUN echo "zend_extension=xdebug.so" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini \
+    && echo "xdebug.start_with_request=yes" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
 
 # Install Composer
 COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
@@ -37,15 +35,6 @@ COPY ./src /var/www/html/
 
 # Set ownership and permissions for the /var/www/html directory to www-data
 RUN chown -R www-data:www-data /var/www/html/
-# Set permissions for /var/run and /var/run/crond so that www-data can write the cron PID file
-
-RUN mkdir -p /var/run \
-    && chown -R www-data:www-data /var/run \
-    && chmod 755 /var/run
-
-# RUN mkdir -p /var/run/crond \
-#     && chown -R www-data:www-data /var/run/crond \
-#     && chmod 755 /var/run/crond
 
 # Copy the wait-for-it.sh script
 COPY ./src/wait-for-it.sh /usr/local/bin/wait-for-it.sh

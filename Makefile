@@ -2,13 +2,11 @@ setup:
 	@make clean
 	@make build
 	@make up
-	@make composer-install
 
 
 setup-update:
 	@make build-update
 	@make up
-	@make composer-update
 
 
 build:
@@ -21,11 +19,10 @@ stop:
 up:
 	docker compose up -d
 
-composer-install:
-	docker exec innoscripta_app bash -c "composer install --no-dev"
-
-composer-update:
-	docker exec innoscripta_app bash -c "composer update --no-dev"
+fetch-articles:
+	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=newsapi"
+	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=guardian"
+	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=nytimes"
 
 
 serve:

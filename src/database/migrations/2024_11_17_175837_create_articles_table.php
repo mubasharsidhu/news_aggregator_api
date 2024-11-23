@@ -24,12 +24,12 @@ return new class extends Migration
             $table->string('apiSource');
             $table->timestamps();
 
-            $table->index('title');
             $table->index('source');
             $table->index('author');
 
             $table->fullText('title');
-            $table->fullText('author');
+            $table->fullText('description');
+
         });
     }
 

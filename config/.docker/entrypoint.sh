@@ -3,13 +3,17 @@
 # Wait for the database to be ready
 wait-for-it.sh db:3306 --timeout=30 || exit 1
 
-# Run the migrations
-php artisan migrate
+# Determine the environment
+if [ "$APP_ENV" = "production" ]; then
+    echo "Production environment detected. Installing dependencies without dev packages..."
+    composer install --no-dev --optimize-autoloader
+else
+    echo "Non-production environment detected. Installing all dependencies..."
+    composer install
+fi
 
-# Fetch articles from multiple sources
-php artisan articles:fetch --source=newsapi
-php artisan articles:fetch --source=guardian
-php artisan articles:fetch --source=nytimes
+echo "Running migrations for default environment..."
+php artisan migrate
 
 # Start supervisord to manage processes
 exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf
