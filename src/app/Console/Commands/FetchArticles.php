@@ -58,13 +58,13 @@ class FetchArticles extends Command
         $source = $this->option('source');
         if (empty($source)) {
             $logger->error('The --source option is required.');
-            return;
+            return 1;
         }
 
         $news_aggregators = array_keys( config('services.news_aggregator_api_keys') );
         if (!in_array($source, $news_aggregators)) {
             $logger->error('Invalid source: The --source can only contain one of these values: '.\implode(', ', $news_aggregators));
-            return;
+            return 1;
         }
 
         $logger->info("Fetching articles from {$source}...");
@@ -80,7 +80,7 @@ class FetchArticles extends Command
 
             if (empty($articles['normalizedArticles'])) {
                 $logger->info("No articles found on page {$page}. Fetching completed.");
-                return;
+                return 0;
             }
 
             $logger->info('Processing articles...');
@@ -94,7 +94,7 @@ class FetchArticles extends Command
 
             if ($articles['currentPage'] === $articles['totalPages']) {
                 $logger->info("All done for today! Fetching completed for {$source}.");
-                return;
+                return 0;
             }
 
             $nextPage = $page + 1;
@@ -107,8 +107,14 @@ class FetchArticles extends Command
 
             $logger->info("Next page:{$nextPage} is dispatched and will be executed in {$delay} seconds.");
 
+            $this->info('All done!');
+            return 0;
+
         } catch (\Exception $e) {
             $logger->error('Error fetching articles: ' . $e->getMessage());
+
+            $this->info('Error state.');
+            return 1;
         }
     }
 }

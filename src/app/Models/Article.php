@@ -19,10 +19,23 @@ class Article extends Model
         'content',
         'source',
         'author',
-        'image_url',
+        'imageUrl',
         'articleUrl',
         'publishedAt',
         'apiSource',
     ];
+
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'published_at' => 'datetime',
+        ];
+    }
 
 }

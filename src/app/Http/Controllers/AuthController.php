@@ -23,7 +23,11 @@ class AuthController extends Controller
                 'password' => ['required','string','confirmed',Password_Rule::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
             ]);
         } catch (ValidationException $th) {
-            return $th->validator->errors();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $th->validator->errors(),
+            ], 422);
         }
 
         $user = User::create([
@@ -32,7 +36,11 @@ class AuthController extends Controller
             'password' => Hash::make($validatedData['password']),
         ]);
 
-        return response()->json(['message' => 'User registered successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'User registered successfully.',
+            'data'    => ['user_id' => $user->id]
+        ], 201);
     }
 
     public function login(Request $request)
@@ -43,24 +51,45 @@ class AuthController extends Controller
                 'password' => 'required|string',
             ]);
         } catch (ValidationException $th) {
-            return $th->validator->errors();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $th->validator->errors(),
+            ], 422);
         }
 
         if (!Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid credentials',
+                'errors'  => 'Invalid credentials',
+            ], 401);
         }
 
-        $user = $request->user();
+        $user  = $request->user();
         $token = $user->createToken('api-user-access-token')->plainTextToken;
 
-        return response()->json(['token' => $token]);
+        return response()->json([
+            'success' => true,
+            'message' => 'Login successful.',
+            'data'    => [
+                'user'  => [
+                    'id'    => $user->id,
+                    'name'  => $user->name,
+                    'email' => $user->email,
+                ],
+                'token' => $token,
+            ],
+        ], 200);
     }
 
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json(['message' => 'Logged out successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Logged out successfully.',
+        ], 200);
     }
 
     public function forgotPassword(Request $request)
@@ -68,14 +97,26 @@ class AuthController extends Controller
         try {
             $request->validate(['email' => 'required|email']);
         } catch (ValidationException $th) {
-            return $th->validator->errors();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $th->validator->errors(),
+            ], 422);
         }
 
         $status = Password::sendResetLink($request->only('email'));
 
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => 'Password reset link sent'])
-            : response()->json(['message' => 'Unable to send reset link'], 500);
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset link sent.',
+            ], 200);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Unable to send reset link.',
+        ], 500);
     }
 
     public function resetPassword(Request $request, $token)
@@ -85,10 +126,13 @@ class AuthController extends Controller
                 'password' => ['required', 'string', 'confirmed', Password_Rule::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
             ]);
         } catch (ValidationException $th) {
-            return $th->validator->errors();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $th->validator->errors(),
+            ], 422);
         }
 
-        // Attempt to reset the password using the token
         $status = Password::reset(
             [
                 'token'    => $token,
@@ -102,11 +146,16 @@ class AuthController extends Controller
             }
         );
 
-        // Check if the password reset was successful
         if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['message' => 'Password reset successful']);
-        } else {
-            return response()->json(['error' => 'The provided token is invalid.'], 401);
+            return response()->json([
+                'success' => true,
+                'message' => 'Password reset successful.',
+            ], 200);
         }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'The provided token is invalid.',
+        ], 401);
     }
 }
