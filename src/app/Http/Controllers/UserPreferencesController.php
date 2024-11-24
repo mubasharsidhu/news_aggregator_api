@@ -9,14 +9,17 @@ class UserPreferencesController extends Controller
 {
     public function preferences(Request $request)
     {
-        $user = $request->user();  // Get the logged-in user
+        $user = $request->user();
         return response()->json([
-            'preferred_sources' => $user->preferred_sources,
-            'preferred_authors' => $user->preferred_authors,
+            'success' => true,
+            'message' => 'User preferences retrieved successfully.',
+            'data'    => [
+                'preferred_sources' => $user->preferred_sources,
+                'preferred_authors' => $user->preferred_authors,
+            ],
         ]);
     }
 
-    // Update the current user's preferences
     public function update(Request $request)
     {
         try {
@@ -25,7 +28,11 @@ class UserPreferencesController extends Controller
                 'preferred_authors' => 'nullable|array',
             ]);
         } catch (ValidationException $th) {
-            return $th->validator->errors();
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed.',
+                'errors'  => $th->validator->errors(),
+            ], 422);
         }
 
         $user = $request->user();
@@ -33,6 +40,13 @@ class UserPreferencesController extends Controller
         $user->preferred_authors = $validated['preferred_authors'] ?? [];
         $user->save();
 
-        return response()->json(['message' => 'Preferences updated successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Preferences updated successfully.',
+            'data'    => [
+                'preferred_sources' => $user->preferred_sources,
+                'preferred_authors' => $user->preferred_authors,
+            ],
+        ]);
     }
 }

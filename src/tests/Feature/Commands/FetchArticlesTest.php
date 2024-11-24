@@ -10,12 +10,12 @@ use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Services\NewsService\NewsapiService;
 use Illuminate\Support\Facades\Bus;
+use App\Console\Commands\FetchArticles;
 use Mockery;
 
 class FetchArticlesTest extends TestCase
 {
     use RefreshDatabase;
-
 
     public function testFetchArticlesSourceNotFound(): void
     {
@@ -233,5 +233,106 @@ class FetchArticlesTest extends TestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
+    public function testValidatesArticleSuccessfully()
+    {
+        $article = [
+            'title'       => 'Test Article Title',
+            'description' => 'A sample description.',
+            'content'     => 'Content goes here.',
+            'source'      => 'Test Source',
+            'author'      => 'Test Author',
+            'imageUrl'    => 'http://example.com/image.jpg',
+            'articleUrl'  => 'http://example.com/article',
+            'publishedAt' => '2024-11-20',
+            'apiSource'   => 'Test API',
+        ];
 
+        $fetchArticles = new FetchArticles(app(NewsServiceFactory::class));
+        $validator     = $fetchArticles->validateArticle($article);
+        $this->assertFalse($validator->fails(), 'Article validation should pass');
+    }
+
+
+    public function testFailsToValidateMissingRequiredFields()
+    {
+        $article = [
+            // Missing 'title' and 'articleUrl'
+            'description' => 'A sample description.',
+            'content'     => 'Content goes here.',
+            'source'      => 'Test Source',
+            'publishedAt' => '2024-11-20',
+            'apiSource'   => 'Test API',
+        ];
+
+        $fetchArticles = new FetchArticles(app(NewsServiceFactory::class));
+        $validator     = $fetchArticles->validateArticle($article);
+
+        $this->assertTrue($validator->fails(), 'Validation should fail due to missing required fields');
+        $this->assertArrayHasKey('title', $validator->errors()->toArray());
+        $this->assertArrayHasKey('articleUrl', $validator->errors()->toArray());
+    }
+
+    public function testFailsToValidateInvalidArticleUrl()
+    {
+        $article = [
+            'title'       => 'Test Article Title',
+            'description' => 'A sample description.',
+            'content'     => 'Content goes here.',
+            'source'      => 'Test Source',
+            'author'      => 'Test Author',
+            'imageUrl'    => 'http://example.com/image.jpg',
+            'articleUrl'  => 'invalid-url', // Invalid URL
+            'publishedAt' => '2024-11-20',
+            'apiSource'   => 'Test API',
+        ];
+
+        $fetchArticles = new FetchArticles(app(NewsServiceFactory::class));
+        $validator     = $fetchArticles->validateArticle($article);
+
+        $this->assertTrue($validator->fails(), 'Validation should fail due to invalid articleUrl');
+        $this->assertArrayHasKey('articleUrl', $validator->errors()->toArray());
+    }
+
+    public function testFailsToValidateExceedingMaxLengthForStringFields()
+    {
+        $article = [
+            'title'       => str_repeat('A', 256), // Exceeds max length
+            'source'      => str_repeat('C', 256), // Exceeds max length
+            'author'      => str_repeat('D', 256), // Exceeds max length
+            'apiSource'   => str_repeat('E', 256), // Exceeds max length
+            'imageUrl'    => 'http://example.com/image.jpg',
+            'articleUrl'  => 'http://example.com/article',
+            'publishedAt' => '2024-11-20',
+        ];
+
+        $fetchArticles = new FetchArticles(app(NewsServiceFactory::class));
+        $validator     = $fetchArticles->validateArticle($article);
+
+        $this->assertTrue($validator->fails(), 'Validation should fail due to exceeding max length');
+        $this->assertArrayHasKey('title', $validator->errors()->toArray());
+        $this->assertArrayHasKey('source', $validator->errors()->toArray());
+        $this->assertArrayHasKey('author', $validator->errors()->toArray());
+        $this->assertArrayHasKey('apiSource', $validator->errors()->toArray());
+    }
+
+    public function testFailsToValidateInvalidDateFormatForPublishedAt()
+    {
+        $article = [
+            'title'       => 'Test Article Title',
+            'description' => 'A sample description.',
+            'content'     => 'Content goes here.',
+            'source'      => 'Test Source',
+            'author'      => 'Test Author',
+            'imageUrl'    => 'http://example.com/image.jpg',
+            'articleUrl'  => 'http://example.com/article',
+            'publishedAt' => 'invalid-date', // Invalid date
+            'apiSource'   => 'Test API',
+        ];
+
+        $fetchArticles = new FetchArticles(app(NewsServiceFactory::class));
+        $validator     = $fetchArticles->validateArticle($article);
+
+        $this->assertTrue($validator->fails(), 'Validation should fail due to invalid date format for publishedAt');
+        $this->assertArrayHasKey('publishedAt', $validator->errors()->toArray());
+    }
 }

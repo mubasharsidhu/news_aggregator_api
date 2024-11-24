@@ -18,7 +18,7 @@ return new class extends Migration
             $table->mediumText('content')->nullable();
             $table->string('source');
             $table->string('author')->nullable();
-            $table->string('imageUrl')->nullable();
+            $table->text('imageUrl')->nullable();
             $table->string('articleUrl');
             $table->timestamp('publishedAt');
             $table->string('apiSource');

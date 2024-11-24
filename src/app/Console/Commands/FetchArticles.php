@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Validator;
 use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Models\Article;
@@ -77,7 +78,6 @@ class FetchArticles extends Command
 
         try {
             $articles = $this->newsService->create($source)->fetchArticles($page, $from);
-
             if (empty($articles['normalizedArticles'])) {
                 $logger->info("No articles found on page {$page}. Fetching completed.");
                 return 0;
@@ -85,8 +85,16 @@ class FetchArticles extends Command
 
             $logger->info('Processing articles...');
 
-            foreach ($articles['normalizedArticles'] as $article) {
-                $article = (array) $article;
+            foreach ($articles['normalizedArticles'] as $article){
+                $article   = (array) $article;
+                $validator = $this->validateArticle($article);
+                if ($validator->fails()) {
+                    $logger->error(
+                        'Validation failed: ' . json_encode($validator->errors() . ' | Article: ' . json_encode($article) )
+                    );
+                    continue;
+                }
+
                 Article::updateOrCreate(['articleUrl' => $article['articleUrl']], $article);
             }
 
@@ -116,5 +124,20 @@ class FetchArticles extends Command
             $this->info('Error state.');
             return 1;
         }
+    }
+
+    public function validateArticle($article)
+    {
+        return Validator::make($article, [
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'content'     => 'nullable|string',
+            'source'      => 'required|string|max:255',
+            'author'      => 'nullable|string|max:255',
+            'imageUrl'    => 'nullable',
+            'articleUrl'  => 'required|url|max:255|unique:articles,articleUrl',
+            'publishedAt' => 'required|date',
+            'apiSource'   => 'required|string|max:255',
+        ]);
     }
 }

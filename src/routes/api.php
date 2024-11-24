@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/articles/feeds', [ArticleController::class, 'articles'])->name('general.feed');
 
-    Route::get('/articles/{id}', [ArticleController::class, 'article']);
+    Route::get('/article/{id}', [ArticleController::class, 'article']);
 
     // Get Unique sources
     Route::get('/articles/unique-sources', [ArticleController::class, 'uniqueSources']);

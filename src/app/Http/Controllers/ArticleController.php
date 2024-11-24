@@ -22,19 +22,16 @@ class ArticleController extends Controller
 
         $query = Article::query();
 
-        // Filter by sources
         if (!empty($sources)) {
             $query->whereIn('source', $sources);
         }
 
-        // Filter by authors
         if (!empty($authors)) {
             $query->whereIn('author', $authors);
         }
 
         if ($request->filled('keyword')) {
             $query->where(function ($q) use ($request) {
-                // Apply orWhere between title and description
                 $q->where('title', 'like', '%' . $request->keyword . '%')
                     ->orWhere('description', 'like', '%' . $request->keyword . '%');
             });
@@ -44,20 +41,36 @@ class ArticleController extends Controller
             $query->whereDate('publishedAt', $request->date);
         }
 
-        // Paginate the results
         $articles = $query->paginate(10);
 
-        return response()->json($articles);
+        return response()->json([
+            'success' => true,
+            'message' => 'Articles retrieved successfully.',
+            'data'    => $articles->items(),
+            'meta'    => [
+                'current_page' => $articles->currentPage(),
+                'last_page'    => $articles->lastPage(),
+                'per_page'     => $articles->perPage(),
+                'total'        => $articles->total(),
+            ],
+        ]);
     }
 
     public function article($id)
     {
         $article = Article::find($id);
         if (!$article) {
-            return response()->json(['message' => 'Article not found'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Article not found.',
+            ], 404);
         }
 
-        return response()->json($article);
+        return response()->json([
+            'success' => true,
+            'message' => 'Article retrieved.',
+            'data'    => $article,
+        ]);
     }
 
     public function uniqueSources()
@@ -65,10 +78,12 @@ class ArticleController extends Controller
         $sources = Article::query()
             ->distinct()
             ->pluck('source')
-            ->filter(); // Filter to remove any null or empty values
+            ->filter();
 
         return response()->json([
-            'sources' => $sources,
+            'success' => true,
+            'message' => 'Unique sources retrieved successfully.',
+            'data'    => $sources,
         ]);
     }
 
@@ -77,10 +92,12 @@ class ArticleController extends Controller
         $authors = Article::query()
             ->distinct()
             ->pluck('author')
-            ->filter(); // Filter to remove any null or empty values
+            ->filter();
 
         return response()->json([
-            'authors' => $authors,
+            'success' => true,
+            'message' => 'Unique authors retrieved successfully.',
+            'data'    => $authors,
         ]);
     }
 }
