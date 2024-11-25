@@ -39,10 +39,6 @@ class NewsapiService implements FetchArticleContract
      */
     public function fetchArticles(int $page, string $from): array
     {
-        if (!isset($this->apiBaseUrl)) {
-            throw new \Exception("Unsupported service: " . $this->source);
-        }
-
         $params   = $this->prepareParams($page, $from);
         $response = Http::get($this->apiBaseUrl, $params);
 

@@ -39,10 +39,6 @@ class NytimesService implements FetchArticleContract
      */
     public function fetchArticles(int $page, string $from): array
     {
-        if (!isset($this->apiBaseUrl)) {
-            throw new \Exception("Unsupported service: " . $this->source);
-        }
-
         $page     = $page - 1; // New york times Api's page count starts from 0. Decrementing to standardize
         $params   = $this->prepareParams($page, $from);
         $response = Http::get($this->apiBaseUrl, $params);
