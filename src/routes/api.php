@@ -11,6 +11,9 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
+/**
+ * user endpoints
+ */
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
@@ -24,11 +27,13 @@ Route::middleware('auth:sanctum')->group(function () {
     // Update the current user's preferences
     Route::put('/user/preferences', [UserPreferencesController::class, 'update']);
 
-    // Fetch personalized news feed based on user preferences
+    // Get personalized news feed based on user preferences
     Route::get('/articles/feeds/personalized', [ArticleController::class, 'articles'])->name('personalized.feed');
 
+    // Get regular all feeds
     Route::get('/articles/feeds', [ArticleController::class, 'articles'])->name('general.feed');
 
+    // Get pecific feed
     Route::get('/article/{id}', [ArticleController::class, 'article']);
 
     // Get Unique sources

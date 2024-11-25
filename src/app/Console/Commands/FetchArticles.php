@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Contracts\Validation\Validator as ValidatorContract;
 use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Models\Article;
@@ -124,7 +125,13 @@ class FetchArticles extends Command
         }
     }
 
-    public function validateArticle($article)
+    /**
+     * Validate the given article data.
+     *
+     * @param array $article The article data to validate.
+     * @return ValidatorContract A Validator instance for the provided data.
+     */
+    public function validateArticle(\App\DTOs\ArticleDTO $article): ValidatorContract
     {
         return Validator::make($article, [
             'title'       => 'required|string|max:255',

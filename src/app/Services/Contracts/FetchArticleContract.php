@@ -12,18 +12,19 @@ interface FetchArticleContract
      * @param int (required) $page The page number for pagination.
      * @param string (required) $from The start date Y-m-d format (e.g., "2024-11-20").
      *
-     * @return array{
+     * @return array {
      *     currentPage: int,
      *     totalPages: int,
      *     normalizedArticles: ArticleDTO[]
-     * } An associative array containing the current page, total pages, and an array of normalized ArticleDTO objects.
+     * }
+     * An associative array containing the current page, total pages, and an array of normalized ArticleDTO objects.
      */
     public function fetchArticles(int $page, string $from): array;
 
     /**
      * Normalize data to a standardized structure.
      *
-     * @param array $article fetched single-article in API's raw formate.
+     * @param array $article fetched, single-article, in API's raw formate.
      *
      * @return ArticleDTO object.
      */

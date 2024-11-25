@@ -8,12 +8,23 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as Password_Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\JsonResponse;
 
 use App\Models\User;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    /**
+     * Register a new user.
+     *
+     * Validates user input for name, email, and password.
+     * Hashes the password and stores user data in the database.
+     * Returns a success response with the new user's ID or an error response if validation fails.
+     *
+     * @param Request $request Incoming HTTP request containing user data.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
+     */
+    public function register(Request $request): JsonResponse
     {
 
         try {
@@ -43,7 +54,17 @@ class AuthController extends Controller
         ], 201);
     }
 
-    public function login(Request $request)
+    /**
+     * Authenticate a user and issue an API token.
+     *
+     * Validates the provided email and password credentials.
+     * If credentials are valid, generates a personal access token for the user.
+     * Returns the user's details and token upon successful login or an error response for invalid credentials.
+     *
+     * @param Request $request Incoming HTTP request containing login credentials.
+     * @return \Illuminate\Http\JsonResponse JSON response with the login result.
+     */
+    public function login(Request $request): JsonResponse
     {
         try {
             $credentials = $request->validate([
@@ -83,7 +104,16 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function logout(Request $request)
+    /**
+     * Log out the authenticated user.
+     *
+     * Deletes the user's current API access token.
+     * Returns a success response upon successful logout.
+     *
+     * @param Request $request Incoming HTTP request containing the authenticated user.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating logout success.
+     */
+    public function logout(Request $request): JsonResponse
     {
         $request->user()->currentAccessToken()->delete();
         return response()->json([
@@ -92,7 +122,17 @@ class AuthController extends Controller
         ], 200);
     }
 
-    public function forgotPassword(Request $request)
+    /**
+     * Send a password reset link to the user's email.
+     *
+     * Validates the provided email address.
+     * Sends a password reset email if the email is valid and registered.
+     * Returns a success response if the link is sent or an error response otherwise.
+     *
+     * @param Request $request Incoming HTTP request containing the user's email.
+     * @return \Illuminate\Http\JsonResponse JSON response indicating the result of the operation.
+     */
+    public function forgotPassword(Request $request): JsonResponse
     {
         try {
             $request->validate(['email' => 'required|email']);
@@ -119,7 +159,19 @@ class AuthController extends Controller
         ], 500);
     }
 
-    public function resetPassword(Request $request, $token)
+    /**
+     * Reset the user's password using a valid reset token.
+     *
+     * Validates the new password and the reset token.
+     * Updates the user's password in the database upon successful validation.
+     * Returns a success response or an error response for invalid token or validation failure.
+     *
+     * @param Request $request Incoming HTTP request containing the reset token and new password.
+     * @param string $token Password reset token.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response indicating the result of the operation.
+     */
+    public function resetPassword(Request $request, $token): JsonResponse
     {
         try {
             $validatedData = $request->validate([

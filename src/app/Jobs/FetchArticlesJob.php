@@ -32,6 +32,10 @@ class FetchArticlesJob implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @param \App\Services\LoggerService; $logger to log the messages
+     *
+     * @return void
      */
     public function handle(LoggerService $logger): void
     {
