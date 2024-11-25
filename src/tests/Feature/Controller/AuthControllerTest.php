@@ -11,9 +11,15 @@ use App\Models\User;
 
 class AuthControllerTest extends TestCase
 {
+    // Enables database refresh between each test to ensure a clean slate
     use RefreshDatabase;
 
-    public function testRegistrationFailsWithInvalidData()
+    /**
+     * Test that user registration fails when invalid data is provided.
+     *
+     * @return void
+     */
+    public function testRegistrationFailsWithInvalidData(): void
     {
         $response = $this->postJson('/api/register', [
             'name'                  => '',
@@ -25,7 +31,12 @@ class AuthControllerTest extends TestCase
         $response->assertStatus(422)->assertJsonValidationErrors(['name', 'email', 'password']);
     }
 
-    public function testUserRegistration()
+    /**
+     * Test successful user registration.
+     *
+     * @return void
+     */
+    public function testUserRegistration(): void
     {
         $response = $this->postJson('/api/register', [
             'name'                  => 'Test User',
@@ -45,7 +56,12 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    public function testUserCanLoginWithValidCredentials()
+    /**
+     * Test that a user can log in with valid credentials.
+     *
+     * @return void
+     */
+    public function testUserCanLoginWithValidCredentials(): void
     {
         $user = User::factory()->create([
             'password' => bcrypt('Password123!'),
@@ -67,7 +83,12 @@ class AuthControllerTest extends TestCase
         $this->assertNotEmpty($responseData['data']['token']);
     }
 
-    public function testLoginFailsWithInvalidCredentials()
+    /**
+     * Test login failure with invalid credentials.
+     *
+     * @return void
+     */
+    public function testLoginFailsWithInvalidCredentials(): void
     {
         $user = User::factory()->create([
             'password' => bcrypt('Password123!'),
@@ -89,7 +110,31 @@ class AuthControllerTest extends TestCase
         $this->assertNotEmpty($responseData['errors']);
     }
 
-    public function testLogoutSuccess()
+    /**
+     * Test returns failed validation when login credentials are missing.
+     *
+     * @return void
+     */
+    public function testReturnsFailedValidationWhenLogin(): void
+    {
+        $response = $this->postJson('/api/login'); // sending without email and password
+
+        $response->assertStatus(422)
+            ->assertJsonStructure(['success','message','errors'])
+            ->assertJson([
+                'success' => false,
+                'message' => 'Validation failed.',
+            ]);
+        $this->assertArrayHasKey('email', $response->json('errors'));
+        $this->assertArrayHasKey('password', $response->json('errors'));
+    }
+
+    /**
+     * Test user logout success.
+     *
+     * @return void
+     */
+    public function testLogoutSuccess(): void
     {
         $user  = User::factory()->create();
         $token = $user->createToken('TestToken')->plainTextToken;
@@ -124,7 +169,12 @@ class AuthControllerTest extends TestCase
         ]);
     }
 
-    public function testSendsResetLinkForValidEmail()
+    /**
+     * Test sending a password reset link for a valid email.
+     *
+     * @return void
+     */
+    public function testSendsResetLinkForValidEmail(): void
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
@@ -146,7 +196,12 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    public function testReturnsValidationErrorForInvalidEmail()
+    /**
+     * Test validation error for an invalid email when requesting a password reset link.
+     *
+     * @return void
+     */
+    public function testReturnsValidationErrorForInvalidEmail(): void
     {
         $response = $this->postJson('/api/forgot-password', [
             'email' => 'invalid-email',
@@ -159,7 +214,12 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    public function testReturnsErrorWhenResetLinkCannotBeSent()
+    /**
+     * Test error when reset link cannot be sent due to invalid email.
+     *
+     * @return void
+     */
+    public function testReturnsErrorWhenResetLinkCannotBeSent(): void
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
@@ -181,7 +241,12 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-    public function testResetsThePasswordSuccessfully()
+    /**
+     * Test successfully resetting the password.
+     *
+     * @return void
+     */
+    public function testResetsThePasswordSuccessfully(): void
     {
         $user = User::factory()->create([
             'email' => 'user@example.com',
@@ -204,7 +269,12 @@ class AuthControllerTest extends TestCase
         $this->assertTrue(Hash::check('SecureP@ssw0rd123', $user->fresh()->password));
     }
 
-    public function testReturnsValidationErrorIfPasswordIsInvalid()
+    /**
+     * Test case to ensure that a validation error is returned if the password is invalid (e.g., too short).
+     *
+     * @return void
+     */
+    public function testReturnsValidationErrorIfPasswordIsInvalid(): void
     {
         $user = User::factory()->create([
             'email' => 'user@example.com',
@@ -230,8 +300,12 @@ class AuthControllerTest extends TestCase
         $this->assertFalse(Hash::check('short', $user->fresh()->password));
     }
 
-
-    public function testReturnsErrorIfTokenIsInvalid()
+    /**
+     * Test case to ensure that an error is returned if the provided token is invalid.
+     *
+     * @return void
+     */
+    public function testReturnsErrorIfTokenIsInvalid(): void
     {
         $user = User::factory()->create([
             'email' => 'user@example.com',
@@ -250,8 +324,12 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-
-    public function testReturnsErrorIfPasswordsDoNotMatch()
+    /**
+     * Test failed password reset due to mismatched passwords.
+     *
+     * @return void
+     */
+    public function testReturnsErrorIfPasswordsDoNotMatch(): void
     {
         $user = User::factory()->create([
             'email' => 'user@example.com',
@@ -271,7 +349,11 @@ class AuthControllerTest extends TestCase
             ]);
     }
 
-
+    /**
+     * Test case to ensure that an error is returned if the email is missing in the reset password request.
+         *
+     * @return void
+     */
     public function testReturnsErrorIfEmailIsMissing()
     {
         $user = User::factory()->create([

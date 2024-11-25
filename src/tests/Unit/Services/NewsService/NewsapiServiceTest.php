@@ -17,6 +17,11 @@ class NewsapiServiceTest extends TestCase
 
     private $service;
 
+    /**
+     * Set up method for initializing the GuardianService instance
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -28,7 +33,7 @@ class NewsapiServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNewsapiFetchArticlesSuccessfully()
+    public function testNewsapiFetchArticlesSuccessfully(): void
     {
         Http::fake([
             'https://newsapi.org/v2/everything*' => Http::response([
@@ -61,7 +66,12 @@ class NewsapiServiceTest extends TestCase
         $this->assertEquals(2, $response['totalPages']);
     }
 
-    public function testNewsapiFetchArticlesSkipsRemovedTitles()
+    /**
+     * Test to skip an article if it does not contain title
+     *
+     * @return void
+     */
+    public function testNewsapiFetchArticlesSkipsRemovedTitles(): void
     {
         Http::fake([
             'https://newsapi.org/v2/everything*' => Http::response([
@@ -104,7 +114,7 @@ class NewsapiServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNewsapiFetchArticlesWithInvalidSource()
+    public function testNewsapiFetchArticlesWithInvalidSource(): void
     {
         $service = new NewsapiService('invalid-source');
         $this->expectException(\Exception::class);
@@ -116,7 +126,7 @@ class NewsapiServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNewsapiHandleFailedHttpRequest()
+    public function testNewsapiHandleFailedHttpRequest(): void
     {
         Http::fake(['https://newsapi.org/v2/everything*' => Http::response('Failed', 500)]);
 
@@ -131,7 +141,7 @@ class NewsapiServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNewsapiHandleEmptyOrMissingArticles()
+    public function testNewsapiHandleEmptyOrMissingArticles(): void
     {
         Http::fake([
             'https://newsapi.org/v2/everything*' => Http::response([
@@ -154,7 +164,7 @@ class NewsapiServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNewsapiNormalizeArticleData()
+    public function testNewsapiNormalizeArticleData(): void
     {
         $article = [
             'title'       => 'Test Title',

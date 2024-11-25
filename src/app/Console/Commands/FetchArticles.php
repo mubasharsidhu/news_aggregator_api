@@ -89,9 +89,7 @@ class FetchArticles extends Command
                 $article   = (array) $article;
                 $validator = $this->validateArticle($article);
                 if ($validator->fails()) {
-                    $logger->error(
-                        'Validation failed: ' . json_encode($validator->errors() . ' | Article: ' . json_encode($article) )
-                    );
+                    $logger->error('Validation failed: ' . json_encode($validator->errors() . ' | Article: ' . json_encode($article) ));
                     continue;
                 }
 

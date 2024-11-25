@@ -17,6 +17,11 @@ class NytimesServiceTest extends TestCase
 
     private $service;
 
+    /**
+     * Set up method for initializing the GuardianService instance
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -28,7 +33,7 @@ class NytimesServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNytimesFetchArticlesSuccessfully()
+    public function testNytimesFetchArticlesSuccessfully(): void
     {
         Http::fake([
             'https://api.nytimes.com/svc/search/v2/articlesearch.json*' => Http::response([
@@ -72,7 +77,7 @@ class NytimesServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNytimesFetchArticlesWithInvalidSource()
+    public function testNytimesFetchArticlesWithInvalidSource(): void
     {
         $service = new NytimesService('invalid-source');
         $this->expectException(\Exception::class);
@@ -84,7 +89,7 @@ class NytimesServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNytimesHandleFailedHttpRequest()
+    public function testNytimesHandleFailedHttpRequest(): void
     {
         Http::fake(['https://api.nytimes.com/svc/search/v2/articlesearch.json*' => Http::response('Failed', 500)]);
 
@@ -99,7 +104,7 @@ class NytimesServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNytimesHandleEmptyOrMissingArticles()
+    public function testNytimesHandleEmptyOrMissingArticles(): void
     {
         Http::fake([
             'https://api.nytimes.com/svc/search/v2/articlesearch.json*' => Http::response([
@@ -122,7 +127,7 @@ class NytimesServiceTest extends TestCase
      *
      * @return void
      */
-    public function testNytimesNormalizeArticleData()
+    public function testNytimesNormalizeArticleData(): void
     {
         $article = [
             'headline'       => ['main' => 'Test Title'],

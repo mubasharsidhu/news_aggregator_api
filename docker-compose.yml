@@ -9,6 +9,8 @@ services:
       - docker-network
     ports:
       - 9000:9000
+    volumes:
+      - ./src:/var/www/html
     environment:
       DB_HOST: db
       DB_PORT: 3306

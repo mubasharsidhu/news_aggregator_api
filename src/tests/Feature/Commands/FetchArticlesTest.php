@@ -2,21 +2,27 @@
 
 namespace Tests\Feature\Commands;
 
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 
 use App\Jobs\FetchArticlesJob;
 use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Services\NewsService\NewsapiService;
-use Illuminate\Support\Facades\Bus;
 use App\Console\Commands\FetchArticles;
+
 use Mockery;
 
 class FetchArticlesTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Test scenario when the '--source' option is not provided.
+     *
+     * @return void
+     */
     public function testFetchArticlesSourceNotFound(): void
     {
         $logger = Mockery::mock(LoggerService::class);
@@ -27,6 +33,12 @@ class FetchArticlesTest extends TestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
+    /**
+     * Test scenario where an invalid '--source' option is provided.
+     * It ensures the appropriate error is logged and no articles are saved.
+     *
+     * @return void
+     */
     public function testFetchArticlesInvalidSource(): void
     {
         $logger = Mockery::mock(LoggerService::class);
@@ -37,6 +49,12 @@ class FetchArticlesTest extends TestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
+    /**
+     * Test scenario where the fetch service returns an empty response.
+     * It ensures no articles are saved and appropriate info is logged.
+     *
+     * @return void
+     */
     public function testFetchArticlesHandlesEmptyResponse(): void
     {
         $mockNewsService    = Mockery::mock(NewsServiceFactory::class);
@@ -65,9 +83,8 @@ class FetchArticlesTest extends TestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
-
     /**
-     * Test the success scenario for FetchArticles command.
+     * Test the success scenario for the 'FetchArticles' command where articles are successfully fetched and saved to the database.
      *
      * @return void
      */
@@ -96,7 +113,6 @@ class FetchArticlesTest extends TestCase
             ],
         ];
 
-        // Configure mocks
         $mockNewsService->shouldReceive('create')
             ->with('newsapi')
             ->andReturn($mockNewsapiService);
@@ -132,9 +148,12 @@ class FetchArticlesTest extends TestCase
     }
 
     /**
-     * Test if the FetchArticlesJob is dispatched when multiple pages are fetched.
+     * Test if the FetchArticlesJob is dispatched for the next page when multiple pages are fetched.
+     * Ensures the correct job is dispatched to handle the next set of articles.
+     *
+     * @return void
      */
-    public function testFetchArticlesSuccessDispatchesForNextPage()
+    public function testFetchArticlesSuccessDispatchesForNextPage(): void
     {
         // Mock the NewsServiceFactory and NewsapiService
         $mockNewsService    = Mockery::mock(NewsServiceFactory::class);
@@ -207,6 +226,11 @@ class FetchArticlesTest extends TestCase
         });
     }
 
+    /**
+     * Test that the `FetchArticles` command handles service exceptions.
+     *
+     * @return void
+     */
     public function testFetchArticlesHandlesServiceException(): void
     {
         $mockNewsService    = Mockery::mock(NewsServiceFactory::class);
@@ -233,7 +257,12 @@ class FetchArticlesTest extends TestCase
         $this->assertDatabaseCount('articles', 0);
     }
 
-    public function testValidatesArticleSuccessfully()
+    /**
+     * Test that an article passes validation when all required fields are present.
+     *
+     * @return void
+     */
+    public function testValidatesArticleSuccessfully(): void
     {
         $article = [
             'title'       => 'Test Article Title',
@@ -253,7 +282,12 @@ class FetchArticlesTest extends TestCase
     }
 
 
-    public function testFailsToValidateMissingRequiredFields()
+    /**
+     * Test that an article fails validation when required fields are missing.
+     *
+     * @return void
+     */
+    public function testFailsToValidateMissingRequiredFields(): void
     {
         $article = [
             // Missing 'title' and 'articleUrl'
@@ -272,7 +306,12 @@ class FetchArticlesTest extends TestCase
         $this->assertArrayHasKey('articleUrl', $validator->errors()->toArray());
     }
 
-    public function testFailsToValidateInvalidArticleUrl()
+    /**
+     * Test that an article fails validation when the article URL is invalid.
+     *
+     * @return void
+     */
+    public function testFailsToValidateInvalidArticleUrl(): void
     {
         $article = [
             'title'       => 'Test Article Title',
@@ -293,7 +332,12 @@ class FetchArticlesTest extends TestCase
         $this->assertArrayHasKey('articleUrl', $validator->errors()->toArray());
     }
 
-    public function testFailsToValidateExceedingMaxLengthForStringFields()
+    /**
+     * Test that an article fails validation when string fields exceed maximum length.
+     *
+     * @return void
+     */
+    public function testFailsToValidateExceedingMaxLengthForStringFields(): void
     {
         $article = [
             'title'       => str_repeat('A', 256), // Exceeds max length
@@ -315,7 +359,12 @@ class FetchArticlesTest extends TestCase
         $this->assertArrayHasKey('apiSource', $validator->errors()->toArray());
     }
 
-    public function testFailsToValidateInvalidDateFormatForPublishedAt()
+    /**
+     * Test that an article fails validation when the `publishedAt` field has an invalid date format.
+     *
+     * @return void
+     */
+    public function testFailsToValidateInvalidDateFormatForPublishedAt(): void
     {
         $article = [
             'title'       => 'Test Article Title',

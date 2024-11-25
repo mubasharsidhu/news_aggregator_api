@@ -13,7 +13,12 @@ class UserPreferencesControllerTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testRetrievesUserPreferences()
+    /**
+     * Test if the user preferences are successfully retrieved.
+     *
+     * @return void
+     * */
+    public function testRetrievesUserPreferences(): void
     {
         $user = User::factory()->create([
             'preferred_sources' => ['Source 1', 'Source 2'],
@@ -33,8 +38,12 @@ class UserPreferencesControllerTest extends TestCase
             ]);
     }
 
-
-    public function testUpdatesUserPreferences()
+    /**
+     * Test if the user preferences are successfully updated.
+     *
+     * @return void
+     * */
+    public function testUpdatesUserPreferences(): void
     {
         $user    = User::factory()->create();
         $payload = [
@@ -65,11 +74,14 @@ class UserPreferencesControllerTest extends TestCase
             $payload['preferred_authors'],
             json_decode($userFromDatabase->preferred_authors, true)
         );
-
-
     }
 
-    public function testReturnsValidationErrorsWhenUpdatingWithInvalidData()
+    /**
+     * Test if validation errors are returned when invalid data is provided while updating user preferences.
+     *
+     * @return void
+     */
+    public function testReturnsValidationErrorsWhenUpdatingWithInvalidData(): void
     {
         $user    = User::factory()->create();
         $payload = [
@@ -90,14 +102,23 @@ class UserPreferencesControllerTest extends TestCase
             ]);
     }
 
-    public function testEnsuresUserIsAuthenticatedToAccessPreferences()
+    /**
+     * Test if an unauthenticated user is prevented from accessing user preferences.
+     *
+     * @return void
+     */
+    public function testEnsuresUserIsAuthenticatedToAccessPreferences(): void
     {
         $response = $this->getJson('/api/user/preferences');
         $response->assertStatus(401);
     }
 
-
-    public function testEnsuresUserIsAuthenticatedToUpdatePreferences()
+    /**
+     * Test if an unauthenticated user is prevented from updating user preferences.
+     *
+     * @return void
+     */
+    public function testEnsuresUserIsAuthenticatedToUpdatePreferences(): void
     {
         $payload = [
             'preferred_sources' => ['Some Source'],

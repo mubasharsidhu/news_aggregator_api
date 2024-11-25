@@ -25,7 +25,7 @@ class Iso8601CheckerTest extends TestCase
      *
      * @return void
      */
-    public function testInvalidIso8601Dates()
+    public function testInvalidIso8601Dates(): void
     {
         $invalidDates = [
             '2024-11-24T14:45:00Zz',  // Invalid timezone format

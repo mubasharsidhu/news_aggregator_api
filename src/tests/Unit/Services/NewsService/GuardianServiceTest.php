@@ -17,6 +17,11 @@ class GuardianServiceTest extends TestCase
 
     private $service;
 
+    /**
+     * Set up method for initializing the GuardianService instance
+     *
+     * @return void
+     */
     protected function setUp(): void
     {
         parent::setUp();
@@ -24,11 +29,11 @@ class GuardianServiceTest extends TestCase
     }
 
     /**
-     * Test successful fetching of articles
+     * Test successful fetching of articles from the Guardian API
      *
      * @return void
      */
-    public function testGuardianFetchArticlesSuccessfully()
+    public function testGuardianFetchArticlesSuccessfully(): void
     {
         Http::fake([
             'https://content.guardianapis.com/search*' => Http::response([
@@ -70,7 +75,7 @@ class GuardianServiceTest extends TestCase
      *
      * @return void
      */
-    public function testGuardianFetchArticlesWithInvalidSource()
+    public function testGuardianFetchArticlesWithInvalidSource(): void
     {
         $service = new GuardianService('invalid-source');
         $this->expectException(\Exception::class);
@@ -82,7 +87,7 @@ class GuardianServiceTest extends TestCase
      *
      * @return void
      */
-    public function testGuardianHandleFailedHttpRequest()
+    public function testGuardianHandleFailedHttpRequest(): void
     {
         Http::fake(['https://content.guardianapis.com/search*' => Http::response('Failed', 500)]);
 
@@ -97,7 +102,7 @@ class GuardianServiceTest extends TestCase
      *
      * @return void
      */
-    public function testGuardianHandleEmptyOrMissingArticles()
+    public function testGuardianHandleEmptyOrMissingArticles(): void
     {
         Http::fake([
             'https://content.guardianapis.com/search*' => Http::response([
@@ -120,7 +125,7 @@ class GuardianServiceTest extends TestCase
      *
      * @return void
      */
-    public function testGuardianNormalizeArticleData()
+    public function testGuardianNormalizeArticleData(): void
     {
         $article = [
             'webTitle' => 'Test Title',

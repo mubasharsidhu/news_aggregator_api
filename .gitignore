@@ -1,8 +1,10 @@
 .env
 
-
 # Ignore VSCode settings folder
 .vscode/
 
 # Ignore macOS system files
 .DS_Store
+
+
+src/supervisord.pid

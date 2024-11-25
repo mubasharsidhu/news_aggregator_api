@@ -16,6 +16,11 @@ class LoggerServiceTest extends TestCase
     protected $consoleOutput;
     protected $logFacade;
 
+    /**
+     * Set up the test environment.
+     *
+     * @return void
+     */
     public function setUp(): void
     {
         parent::setUp();
@@ -24,14 +29,23 @@ class LoggerServiceTest extends TestCase
         $this->logFacade     = Mockery::mock('alias:'. Log::class);
     }
 
+    /**
+     * Clean up after each test method.
+     *
+     * @return void
+     */
     public function tearDown(): void
     {
         Mockery::close();
         parent::tearDown();
     }
 
-
-    public function testLogWhenRunningInConsole()
+    /**
+     * Test the logging functionality when running in the console.
+     *
+     * @return void
+     */
+    public function testLogWhenRunningInConsole(): void
     {
         $this->app->instance('app', $this->mockRunningInConsole(true));
 
@@ -47,8 +61,12 @@ class LoggerServiceTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
-
-    public function testLogWhenNotRunningInConsole()
+    /**
+     * Test the logging functionality when not running in the console.
+     *
+     * @return void
+     */
+    public function testLogWhenNotRunningInConsole(): void
     {
         $this->app->instance('app', $this->mockRunningInConsole(false));
 
@@ -61,10 +79,14 @@ class LoggerServiceTest extends TestCase
 
         $this->service->log($level, $message, $channel);
         $this->expectNotToPerformAssertions();
-
     }
 
-    public function testLoggerInfoMethod()
+    /**
+     * Test the 'info' method of the LoggerService.
+     *
+     * @return void
+     */
+    public function testLoggerInfoMethod(): void
     {
         $message = 'Info Message';
         $channel = 'info_channel';
@@ -75,7 +97,12 @@ class LoggerServiceTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
-    public function testLoggerErrorMethod()
+    /**
+     * Test the 'error' method of the LoggerService.
+     *
+     * @return void
+     */
+    public function testLoggerErrorMethod(): void
     {
         $message = 'Error Message';
         $channel = 'error_channel';
@@ -86,7 +113,14 @@ class LoggerServiceTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
-    protected function mockRunningInConsole($return)
+    /**
+     * Mock the 'runningInConsole' method of the app instance.
+     *
+     * @param bool $return Value to return for 'runningInConsole' mock.
+     *
+     * @return \Mockery\MockInterface Mocked app instance
+     */
+    protected function mockRunningInConsole($return): \Mockery\MockInterface
     {
         $app = Mockery::mock('Illuminate\Foundation\Application');
         $app->shouldReceive('runningInConsole')->andReturn($return);
