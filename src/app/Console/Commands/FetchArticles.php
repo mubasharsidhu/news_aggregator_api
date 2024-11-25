@@ -131,7 +131,7 @@ class FetchArticles extends Command
      * @param array $article The article data to validate.
      * @return ValidatorContract A Validator instance for the provided data.
      */
-    public function validateArticle(\App\DTOs\ArticleDTO $article): ValidatorContract
+    public function validateArticle(array $article): ValidatorContract
     {
         return Validator::make($article, [
             'title'       => 'required|string|max:255',
