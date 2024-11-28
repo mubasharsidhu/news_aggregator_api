@@ -16,4 +16,5 @@ echo "Running migrations for default environment..."
 php artisan migrate
 
 # Start supervisord to manage processes
+echo "Supervisor configuration not found. Starting Apache..."
 exec /usr/bin/supervisord -c /etc/supervisor/supervisord.conf

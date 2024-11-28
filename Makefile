@@ -24,14 +24,6 @@ fetch-articles:
 	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=guardian"
 	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=nytimes"
 
-
-migrate-testing:
-	cd src && php artisan migrate --env=testing --force
-
-serve:
-	docker exec innoscripta_app bash -c "php artisan serve"
-
-
 clean:
 	docker compose down --volumes --remove-orphans
 	docker system prune -f

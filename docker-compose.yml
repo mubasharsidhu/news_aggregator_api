@@ -4,40 +4,39 @@ services:
     build:
       context: .
       dockerfile: src/Dockerfile
-    restart: unless-stopped
-    networks:
-      - docker-network
     ports:
-      - 9000:9000
+      - "8080:80"
     volumes:
       - ./src:/var/www/html
     environment:
-      DB_HOST: db
-      DB_PORT: 3306
+      PHP_ENV: development
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
       DB_DATABASE: ${MYSQL_DATABASE}
       DB_USERNAME: ${MYSQL_USERNAME}
       DB_PASSWORD: ${MYSQL_PASSWORD}
     depends_on:
       - db
+    networks:
+      - app-network
 
   db:
     image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USERNAME: ${MYSQL_USERNAME}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - 3307:3306
-    restart: always
     volumes:
-      - news_aggregator_api-db-data:/var/lib/mysql
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=${MYSQL_DATABASE}
-      - MYSQL_USERNAME=${MYSQL_USERNAME}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - db-data:/var/lib/mysql
     networks:
-      - docker-network
+      - app-network
 
 volumes:
-  news_aggregator_api-db-data:
+  db-data:
 
 networks:
-  docker-network:
-    driver: bridge
+  app-network:
