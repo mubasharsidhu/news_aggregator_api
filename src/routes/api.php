@@ -7,10 +7,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserPreferencesController;
 use App\Http\Controllers\ArticleController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
 /**
  * user endpoints
  */
@@ -21,6 +17,10 @@ Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/reset-password/{token}', [AuthController::class, 'resetPassword'])->name('password.reset');
 
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Get the current user's preferences
+    Route::get('/user', [UserPreferencesController::class, 'user']);
+
     // Get the current user's preferences
     Route::get('/user/preferences', [UserPreferencesController::class, 'preferences']);
 

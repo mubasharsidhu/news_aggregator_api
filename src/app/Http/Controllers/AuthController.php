@@ -23,13 +23,40 @@ class AuthController extends Controller
      *
      * @param Request $request Incoming HTTP request containing user data.
      * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
+     *
+     * @bodyParam name string required The name of the user. Example: John Doe
+     * @bodyParam email string required The email address of the user. Example: john@example.com
+     * @bodyParam password string required The password for the user. Must be at least 8 characters and include letters, numbers, and symbols. Example: P@ssw0rd!
+     * @bodyParam password_confirmation string required Must match the password. Example: P@ssw0rd!
+     *
+     * @response 201 {
+     *   "success": true,
+     *   "message": "User registered successfully.",
+     *   "data": {
+     *     "user_id": 1
+     *   }
+     * }
+     *
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email has already been taken."],
+     *     "password": ["The password does not meet the required rules."]
+     *   }
+     * }
+     *
+     * @unauthenticated
      */
     public function register(Request $request): JsonResponse
     {
         try {
             $validatedData = $request->validate([
+                // Name of the User
                 'name'     => 'required|string|max:255',
+                // Email of the User
                 'email'    => 'required|string|email|max:255|unique:users',
+                // Password of the User
                 'password' => ['required','string','confirmed',Password_Rule::min(8)->letters()->mixedCase()->numbers()->symbols()->uncompromised()],
             ]);
         } catch (ValidationException $th) {
@@ -62,6 +89,39 @@ class AuthController extends Controller
      *
      * @param Request $request Incoming HTTP request containing login credentials.
      * @return \Illuminate\Http\JsonResponse JSON response with the login result.
+     *
+     * @bodyParam email string required The user's email address. Example: john.doe@example.com
+     * @bodyParam password string required The user's password. Example: P@ssw0rd!
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Login successful.",
+     *   "data": {
+     *     "user": {
+     *       "id": 1,
+     *       "name": "John Doe",
+     *       "email": "john.doe@example.com"
+     *     },
+     *     "token": "token_string_here"
+     *   }
+     * }
+     *
+     * @response 401 {
+     *   "success": false,
+     *   "message": "Invalid credentials",
+     *   "errors": "Invalid credentials"
+     * }
+     *
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email field is required."],
+     *     "password": ["The password field is required."]
+     *   }
+     * }
+     *
+     * @unauthenticated
      */
     public function login(Request $request): JsonResponse
     {
@@ -111,6 +171,17 @@ class AuthController extends Controller
      *
      * @param Request $request Incoming HTTP request containing the authenticated user.
      * @return \Illuminate\Http\JsonResponse JSON response indicating logout success.
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Logged out successfully."
+     * }
+     *
+     * @response 401 {
+     *   "success": false,
+     *   "message": "Unauthenticated user.",
+     *   "errors": "Unauthenticated."
+     * }
      */
     public function logout(Request $request): JsonResponse
     {
@@ -130,6 +201,28 @@ class AuthController extends Controller
      *
      * @param Request $request Incoming HTTP request containing the user's email.
      * @return \Illuminate\Http\JsonResponse JSON response indicating the result of the operation.
+     *
+     * @bodyParam email string required The user's email address. Example: john.doe@example.com
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Password reset link sent."
+     * }
+     *
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "email": ["The email field is required.", "The email must be a valid email address."]
+     *   }
+     * }
+     *
+     * @response 500 {
+     *   "success": false,
+     *   "message": "Unable to send reset link."
+     * }
+     *
+     * @unauthenticated
      */
     public function forgotPassword(Request $request): JsonResponse
     {
@@ -169,6 +262,33 @@ class AuthController extends Controller
      * @param string $token Password reset token.
      *
      * @return \Illuminate\Http\JsonResponse JSON response indicating the result of the operation.
+     *
+     * @bodyParam password string required The new password. Must be at least 8 characters, with letters, numbers, symbols, and mixed case. Example: Password@123
+     * @bodyParam password_confirmation string required Confirmation of the new password. Example: Password@123
+     * @queryParam token string required The reset token sent to the user's email. Example: abc123resetToken
+     *
+     * @response 200 {
+     *   "success": true,
+     *   "message": "Password reset successful."
+     * }
+     *
+     * @response 401 {
+     *   "success": false,
+     *   "message": "The provided token is invalid."
+     * }
+     *
+     * @response 422 {
+     *   "success": false,
+     *   "message": "Validation failed.",
+     *   "errors": {
+     *     "password": [
+     *       "The password must be at least 8 characters.",
+     *       "The password must contain letters, numbers, and symbols."
+     *     ]
+     *   }
+     * }
+     *
+     * @unauthenticated
      */
     public function resetPassword(Request $request, $token): JsonResponse
     {
