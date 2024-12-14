@@ -98,10 +98,10 @@
                                 <a href="#endpoints-PUTapi-user-preferences">Update the authenticated user's preferences.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-articles-feeds-personalized">
-                                <a href="#endpoints-GETapi-articles-feeds-personalized">Search</a>
+                                <a href="#endpoints-GETapi-articles-feeds-personalized">Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-articles-feeds">
-                                <a href="#endpoints-GETapi-articles-feeds">Search</a>
+                                <a href="#endpoints-GETapi-articles-feeds">Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</a>
                             </li>
                                                                                 <li class="tocify-item level-2" data-unique="endpoints-GETapi-article--id-">
                                 <a href="#endpoints-GETapi-article--id-">Retrieve details of a specific article by its ID.</a>
@@ -943,7 +943,7 @@ Returns a success response or an error response for invalid token or validation 
 
 <div class="bash-example">
     <pre><code class="language-bash">curl --request POST \
-    "http://localhost:8080/api/reset-password/impedit?token=abc123resetToken" \
+    "http://localhost:8080/api/reset-password/rem?token=abc123resetToken" \
     --header "Content-Type: application/json" \
     --header "Accept: application/json" \
     --data "{
@@ -955,7 +955,7 @@ Returns a success response or an error response for invalid token or validation 
 
 <div class="javascript-example">
     <pre><code class="language-javascript">const url = new URL(
-    "http://localhost:8080/api/reset-password/impedit"
+    "http://localhost:8080/api/reset-password/rem"
 );
 
 const params = {
@@ -983,7 +983,7 @@ fetch(url, {
 
 <div class="php-example">
     <pre><code class="language-php">$client = new \GuzzleHttp\Client();
-$url = 'http://localhost:8080/api/reset-password/impedit';
+$url = 'http://localhost:8080/api/reset-password/rem';
 $response = $client-&gt;post(
     $url,
     [
@@ -1119,10 +1119,10 @@ You can check the Dev Tools console for debugging information.</code></pre>
  &nbsp;
                 <input type="text" style="display: none"
                               name="token"                data-endpoint="POSTapi-reset-password--token-"
-               value="impedit"
+               value="rem"
                data-component="url">
     <br>
-<p>Example: <code>impedit</code></p>
+<p>Example: <code>rem</code></p>
             </div>
                         <h4 class="fancy-heading-panel"><b>Query Parameters</b></h4>
                                     <div style="padding-left: 28px; clear: unset;">
@@ -1734,13 +1734,13 @@ You can check the Dev Tools console for debugging information.</code></pre>
         </div>
         </form>
 
-                    <h2 id="endpoints-GETapi-articles-feeds-personalized">Search</h2>
+                    <h2 id="endpoints-GETapi-articles-feeds-personalized">Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</h2>
 
 <p>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</p>
+
 
 <span id="example-requests-GETapi-articles-feeds-personalized">
 <blockquote>Example request:</blockquote>
@@ -1977,13 +1977,13 @@ You can check the Dev Tools console for debugging information.</code></pre>
             </div>
                 </form>
 
-                    <h2 id="endpoints-GETapi-articles-feeds">Search</h2>
+                    <h2 id="endpoints-GETapi-articles-feeds">Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</h2>
 
 <p>
 <small class="badge badge-darkred">requires authentication</small>
 </p>
 
-<p>Retrieve a list of articles based on filters such as sources, authors, keywords, and date.</p>
+
 
 <span id="example-requests-GETapi-articles-feeds">
 <blockquote>Example request:</blockquote>

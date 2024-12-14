@@ -474,7 +474,7 @@ paths:
         in: path
         name: token
         description: ''
-        example: impedit
+        example: rem
         required: true
         schema:
           type: string
@@ -721,9 +721,9 @@ paths:
                     type: string
   /api/articles/feeds/personalized:
     get:
-      summary: Search
-      operationId: search
-      description: 'Retrieve a list of articles based on filters such as sources, authors, keywords, and date.'
+      summary: 'Retrieve a list of articles based on filters such as sources, authors, keywords, and date.'
+      operationId: retrieveAListOfArticlesBasedOnFiltersSuchAsSourcesAuthorsKeywordsAndDate
+      description: ''
       parameters:
         -
           in: query
@@ -879,9 +879,9 @@ paths:
         - Endpoints
   /api/articles/feeds:
     get:
-      summary: Search
-      operationId: search
-      description: 'Retrieve a list of articles based on filters such as sources, authors, keywords, and date.'
+      summary: 'Retrieve a list of articles based on filters such as sources, authors, keywords, and date.'
+      operationId: retrieveAListOfArticlesBasedOnFiltersSuchAsSourcesAuthorsKeywordsAndDate
+      description: ''
       parameters:
         -
           in: query

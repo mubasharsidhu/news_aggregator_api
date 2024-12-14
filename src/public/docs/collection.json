@@ -10,7 +10,7 @@
     ],
     "info": {
         "name": "Laravel",
-        "_postman_id": "d58785dc-a5d1-46d9-afb9-7a551200f73b",
+        "_postman_id": "67133b06-e95d-44ae-9e26-069513ff04c7",
         "description": "",
         "schema": "https:\/\/schema.getpostman.com\/json\/collection\/v2.1.0\/collection.json"
     },
@@ -220,7 +220,7 @@
                                 {
                                     "id": "token",
                                     "key": "token",
-                                    "value": "impedit",
+                                    "value": "rem",
                                     "description": ""
                                 }
                             ]
@@ -384,7 +384,7 @@
                     ]
                 },
                 {
-                    "name": "Search",
+                    "name": "Retrieve a list of articles based on filters such as sources, authors, keywords, and date.",
                     "request": {
                         "url": {
                             "host": "{{baseUrl}}",
@@ -429,7 +429,7 @@
                             }
                         ],
                         "body": null,
-                        "description": "Retrieve a list of articles based on filters such as sources, authors, keywords, and date."
+                        "description": ""
                     },
                     "response": [
                         {
@@ -447,7 +447,7 @@
                     ]
                 },
                 {
-                    "name": "Search",
+                    "name": "Retrieve a list of articles based on filters such as sources, authors, keywords, and date.",
                     "request": {
                         "url": {
                             "host": "{{baseUrl}}",
@@ -492,7 +492,7 @@
                             }
                         ],
                         "body": null,
-                        "description": "Retrieve a list of articles based on filters such as sources, authors, keywords, and date."
+                        "description": ""
                     },
                     "response": [
                         {
