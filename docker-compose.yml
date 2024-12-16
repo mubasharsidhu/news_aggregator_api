@@ -5,16 +5,17 @@ services:
       context: .
       dockerfile: src/Dockerfile
     ports:
-      - "8081:80"
+      - "${APP_PORT}:80"
     volumes:
       - ./src:/var/www/html
+      - ./.env:/var/www/html/.env
     environment:
       PHP_ENV: development
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      DB_DATABASE: ${MYSQL_DATABASE}
-      DB_USERNAME: ${MYSQL_USERNAME}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_HOST: db # container name "db"
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     depends_on:
       - db
     networks:
@@ -25,11 +26,11 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USERNAME: ${MYSQL_USERNAME}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USERNAME: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
-      - 3307:3306
+      - ${DB_PORT}:3306
     volumes:
       - db-data:/var/lib/mysql
     networks:

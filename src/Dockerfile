@@ -28,12 +28,9 @@ COPY --from=composer/composer:latest-bin /composer /usr/bin/composer
 # Copy custom Apache config
 COPY ./config/.docker/apache-config.conf /etc/apache2/sites-available/000-default.conf
 
-# Copy the application files to the container
-COPY ./src /var/www/html/
-
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+# RUN chown -R www-data:www-data /var/www/html \
+#     && chmod -R 755 /var/www/html
 
 # Copy the wait-for-it.sh script
 COPY ./src/wait-for-it.sh /usr/local/bin/wait-for-it.sh
