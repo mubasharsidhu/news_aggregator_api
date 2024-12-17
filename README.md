@@ -10,11 +10,11 @@ As a sample, following three APIs are integrated:
 
 ## Getting Started
 
-### Dependencies
+### Pre-requisites
 
-Docker Engine: v27.3.1 or higher. You may download it from [here](https://docs.docker.com/engine/release-notes/27/)
+Docker Engine: v27.3.1 or higher must be running. You may download it from [here](https://docs.docker.com/engine/release-notes/27/)
 
-### Installing
+### Installation
 
 1. #### Setup
 
@@ -30,23 +30,26 @@ Docker Engine: v27.3.1 or higher. You may download it from [here](https://docs.d
 
    - Open the unzipped/cloned `news_aggregator_api` folder in terminal to run the commands
 
-   - Run the following command and press enter
+   - Run the following command to make sure you can see the `Makefile` file in the list in root
      ```
      ls
      ```
-   - Make sure you can see the `Makefile` file in the list
 
 3. #### Environment
 
-   - Rename the `.env.sample` file to `.env` and update the environment variables i.e. database name and passwords, Or leave as it is.
+   Rename the `.env.sample` file to `.env`.
+
+   - Update the environment variables i.e. database name and passwords.
+   - OR
+   - Leave as it is.
 
 4. #### News API Keys
 
-   You may use the my currently added News sources API keys (in `.env` file) for testing.
+   Add your News sources **API keys** (in `.env` file).
 
    OR
 
-   Obtain your own API keys from following links and Add the relevant environment variable to `.env` file
+   Obtain your own API keys from following links and add the relevant environment variable to `.env` file
 
    - News API ([Link here](https://newsapi.org/register))
 
@@ -83,8 +86,7 @@ Docker Engine: v27.3.1 or higher. You may download it from [here](https://docs.d
 ### How to run the program
 
 - [Scribe](https://scribe.knuckles.wtf/laravel) is used to for Restful API endpoints documentation.
-- Once the program is running, the endpoints documentation can be accessed on [this URL](http://localhost:8081/docs/)
-- Samples codes in the docs are currently available for `Bash`, `Javascript` and `PHP`.
+- Once the program is running, the endpoints docs can be accessed on [this URL](http://localhost:8081/docs/)
 
 ##
 
@@ -109,9 +111,9 @@ make run-tests
 
 ##
 
-### Add new News source
+### Add a new News Source
 
-To add new news source to fetch articles, you may simply perform the following steps:
+To add a new news source to fetch articles, you may simply perform the following steps:
 
 1. Obtain the API key from the news API source (for example `xyztimes`)
 2. Add that API key to .env file at root where Makefile is placed
@@ -119,11 +121,13 @@ To add new news source to fetch articles, you may simply perform the following s
 
    Find **news_aggregator_api_keys** and put that env variable in config
 
-4. Next, create a news service class to fetch the articles, in `src -> app -> Services -> NewsService`. As per exampple the class name should be **XyztimesService**
+4. Next, create a news service class to fetch the articles, in `src -> app -> Services -> NewsService`. As per the example the class name should be **XyztimesService**
 
    Implement the `FetchArticleContract` contract/interface to enforce the data stability/standardization
 
-5. Finally, add the schedule where `xyztimes` is the service class name prefix that you just created to fetch the articles.
+5. Finally, add the schedule in `src -> routes -> console.php`
+
+   here `--source=xyztimes` is the service class name prefix that you just created to fetch the articles.
 
    In your case it's `XyztimesService`
 
