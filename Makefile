@@ -14,16 +14,23 @@ build:
 build-update:
 	docker compose build --no-cache
 
+
 stop:
 	docker compose stop
 up:
 	docker compose up -d
+
+
+clean:
+	docker compose down --volumes --remove-orphans
+	docker system prune -f
+
 
 fetch-articles:
 	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=newsapi"
 	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=guardian"
 	docker exec innoscripta_app bash -c "php artisan articles:fetch --source=nytimes"
 
-clean:
-	docker compose down --volumes --remove-orphans
-	docker system prune -f
+
+run-tests:
+	docker exec innoscripta_app bash -c "php artisan test --coverage"
