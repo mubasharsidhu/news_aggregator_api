@@ -9,6 +9,7 @@ use App\Services\LoggerService;
 use App\Services\NewsServiceFactory;
 use App\Models\Article;
 use App\Jobs\FetchArticlesJob;
+use App\Services\OpenAIService;
 
 class FetchArticles extends Command
 {
@@ -55,7 +56,7 @@ class FetchArticles extends Command
      *
      * @param LoggerService $logger to log the information
      */
-    public function handle(LoggerService $logger) {
+    public function handle(LoggerService $logger, OpenAIService $openAI) {
 
         $source = $this->option('source');
         if (empty($source)) {
@@ -93,6 +94,9 @@ class FetchArticles extends Command
                     $logger->error('Validation failed: ' . json_encode($validator->errors() . ' | Article: ' . json_encode($article) ));
                     continue;
                 }
+
+                $summary            = $openAI->summarize($article['content'], $logger);
+                $article['content'] = $summary ?? $article['content'];
 
                 Article::updateOrCreate(['articleUrl' => $article['articleUrl']], $article);
             }

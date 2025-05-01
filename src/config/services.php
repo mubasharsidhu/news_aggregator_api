@@ -40,4 +40,6 @@ return [
         'guardian' => env('GUARDIAN_API_KEY'),
         'nytimes'  => env('NYT_API_KEY'),
     ],
+
+    'news_aggregator_openai_api_key' => env('OpenAI_API_KEY'),
 ];
